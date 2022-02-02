@@ -1,1 +1,1 @@
-# Image-Processing-Using-MPI
+Final project in 2022 Spring 
