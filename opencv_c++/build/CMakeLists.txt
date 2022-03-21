@@ -1,0 +1,6 @@
+set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 2.8)
+project( mpi_opencv_image_processing )
+find_package( OpenCV REQUIRED )
+add_executable( mpi_opencv_image_processing mpi_opencv_image_processing.cpp )
+target_link_libraries( mpi_opencv_image_processing ${OpenCV_LIBS} )

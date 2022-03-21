@@ -1,0 +1,6 @@
+set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 2.8)
+project( main )
+find_package( OpenCV REQUIRED )
+add_executable( main main.cpp img_processing.cpp img_processing.h matrix_para.cpp matrix_para.h)
+target_link_libraries( main ${OpenCV_LIBS} )

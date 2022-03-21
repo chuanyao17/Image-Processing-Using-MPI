@@ -1,3 +1,0 @@
-/home/chuanyao17/image-processing-using-mpi/opencv_c++/CMakeFiles/rebuild_cache.dir
-/home/chuanyao17/image-processing-using-mpi/opencv_c++/CMakeFiles/edit_cache.dir
-/home/chuanyao17/image-processing-using-mpi/opencv_c++/CMakeFiles/mpi_opencv_image_processing.dir
