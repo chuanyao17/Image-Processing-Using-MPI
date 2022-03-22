@@ -26,9 +26,9 @@ int main(int argc, char* argv[])
     }
 
     //show the input image on the screen
-    namedWindow("Display Image", WINDOW_AUTOSIZE);
-    imshow("Display Image", image);
-    waitKey(0); // display the window infinitely until any keypress (need to be modified)
+    // namedWindow("Display Image", WINDOW_AUTOSIZE);
+    // imshow("Display Image", image);
+    // waitKey(0); // display the window infinitely until any keypress (need to be modified)
     
     printf("program starts:  \n");
     while (stop)
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
         switch (selection)
         {
             case 1:
-                img=img_zooming();
+                img_zooming(image,8,8);
                 break;
             case 2:
                 stop=false;

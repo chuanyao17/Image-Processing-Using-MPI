@@ -3,10 +3,29 @@
 #include <cstdio>
 #include "opencv2/opencv.hpp"
 
-int img_zooming()
+using namespace cv;
+
+void img_zooming(Mat &src, double kx, double ky)
 {
     printf("img_zooming is working\n");
-    return matrix_multiply();
+    int  row = src.rows * kx;
+	int  col = src.cols * ky;
+
+	cv::Mat dst(row, col, src.type());
+	
+    for (int i = 0; i < row; i++)
+	{
+		int srx = i / kx;
+		for (int j = 0; j < col; j++)
+		{
+			int sry = j /ky;
+			dst.at<cv::Vec3b>(i, j) = src.at<cv::Vec3b>(srx, sry);
+		}
+	}
+	cv::imwrite("../4.jpg", dst);
+    // cv::imshow( "image", dst );
+    // cv::waitKey(0);
+    return; 
 }
 int img_rotation()
 {
