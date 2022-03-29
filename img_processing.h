@@ -10,7 +10,7 @@ void img_zooming(Mat &, double, double);
 int img_rotation();
 int img_brightness();
 int img_contrast();
-int img_blurring();
+void img_blurring(Mat &);
 int img_grayscale();
 
 #endif

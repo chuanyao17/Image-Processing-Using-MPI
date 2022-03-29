@@ -26,14 +26,16 @@ int main(int argc, char* argv[])
     }
 
     //show the input image on the screen
-    // namedWindow("Display Image", WINDOW_AUTOSIZE);
-    // imshow("Display Image", image);
-    // waitKey(0); // display the window infinitely until any keypress (need to be modified)
+    namedWindow("Display Image", WINDOW_AUTOSIZE);
+    imshow("Display Image", image);
+    waitKey(0); // display the window infinitely until any keypress (need to be modified)
+    destroyAllWindows();
+    // waitKey(1);
     
     printf("program starts:  \n");
     while (stop)
     {
-        printf("please select: 1.img_zooming  2.exit \n");  
+        printf("please select: 1.img_zooming  5.img_blurring  7.exit\n");  
         scanf("%d",&selection); // need to check input , only accept number!
         //considering using enum
         switch (selection)
@@ -42,6 +44,17 @@ int main(int argc, char* argv[])
                 img_zooming(image,8,8);
                 break;
             case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                img_blurring(image);
+                break;
+            case 6:
+                break;
+            case 7:
                 stop=false;
                 break;
             default:
