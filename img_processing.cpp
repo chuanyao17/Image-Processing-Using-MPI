@@ -31,16 +31,83 @@ int img_rotation()
 {
     printf("img_rotation is working\n");
     return 1;
-}
-int img_brightness()
+} 
+void img_brightness(Mat &src, float alpha, float beta)
 {
     printf("img_brightness is working\n");
-    return 1;
+	Mat dst = src.clone();
+	for(int row =0 ; row < src.rows ; row++){
+        for(int col = 0 ; col < src.cols ; col++){
+            //如果输入图像为三通道 RGB
+            if(src.channels() == 3){
+                //对每个通道上的数据做计算
+                dst.at<Vec3b>(row,col)[0] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[0]*alpha + beta);
+                dst.at<Vec3b>(row,col)[1] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[1]*alpha + beta);
+                dst.at<Vec3b>(row,col)[2] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[2]*alpha + beta);
+                //如果输入图像为单通道 灰度
+            }else if(src.channels() == 1){
+                //对单一通道做计算
+                dst.at<uchar>(row,col) = saturate_cast<uchar>(src.at<uchar>(row,col)*alpha + beta);
+            }
+        }
+        
+    }
+    imshow("brightness",dst);
+    waitKey(0);
+	destroyAllWindows();
+    return;
 }
-int img_contrast()
+void img_contrast(Mat &src, float percent)
 {
     printf("img_contrast is working\n");
-    return 1;
+	float alpha = percent / 100.f;
+	alpha = max(-1.f, min(1.f, alpha));
+	Mat temp = src.clone();
+	int row = src.rows;
+	int col = src.cols;
+	int thresh = 127;
+	for (int i = 0; i < row; ++i)
+	{
+		uchar *t = temp.ptr<uchar>(i);
+		uchar *s = src.ptr<uchar>(i);
+		for (int j = 0; j < col; ++j)
+		{
+			uchar b = s[3 * j];
+			uchar g = s[3 * j + 1];
+			uchar r = s[3 * j + 2];
+			int newb, newg, newr;
+			if (alpha == 1)
+			{
+				t[3 * j + 2] = r > thresh ? 255 : 0;
+				t[3 * j + 1] = g > thresh ? 255 : 0;
+				t[3 * j] = b > thresh ? 255 : 0;
+				continue;
+			}
+			else if (alpha >= 0)
+			{
+				newr = static_cast<int>(thresh + (r - thresh) / (1 - alpha));
+				newg = static_cast<int>(thresh + (g - thresh) / (1 - alpha));
+				newb = static_cast<int>(thresh + (b - thresh) / (1 - alpha));
+			}
+			else {
+				newr = static_cast<int>(thresh + (r - thresh) * (1 + alpha));
+				newg = static_cast<int>(thresh + (g - thresh) * (1 + alpha));
+				newb = static_cast<int>(thresh + (b - thresh) * (1 + alpha));
+ 
+			}
+			newr = max(0, min(255, newr));
+			newg = max(0, min(255, newg));
+			newb = max(0, min(255, newb));
+			t[3 * j + 2] = static_cast<uchar>(newr);
+			t[3 * j + 1] = static_cast<uchar>(newg);
+			t[3 * j] = static_cast<uchar>(newb);
+		}
+	}
+	// return temp;
+	imshow("contrast", temp);
+	waitKey(0);
+    destroyAllWindows();
+	return;
 }
 void img_blurring(Mat &src)
 {
@@ -88,8 +155,34 @@ void img_blurring(Mat &src)
 	return;
 }
 
-int img_grayscale()
+void img_grayscale(Mat &src)
 {
     printf("img_grayscale is working\n");
-    return 1;
+    Mat temp = src.clone();
+	int row = src.rows;
+	int col = src.cols;
+	for (int i = 0; i < row; ++i)
+	{
+		uchar *t = temp.ptr<uchar>(i);
+		uchar *s = src.ptr<uchar>(i);
+		for (int j = 0; j < col; ++j)
+		{
+			uchar b = s[3 * j];
+			uchar g = s[3 * j + 1];
+			uchar r = s[3 * j + 2];
+			int gray_pixel;
+
+			gray_pixel= r*0.299 + g*0.587 +b*0.114;
+			
+			gray_pixel = max(0, min(255, gray_pixel));
+			t[3 * j + 2] = static_cast<uchar>(gray_pixel);
+			t[3 * j + 1] = static_cast<uchar>(gray_pixel);
+			t[3 * j] = static_cast<uchar>(gray_pixel);
+		}
+	}
+	// return temp;
+	imshow("grayscale", temp);
+	waitKey(0);
+    destroyAllWindows();
+	return;
 }

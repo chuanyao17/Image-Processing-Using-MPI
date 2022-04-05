@@ -8,9 +8,9 @@ using namespace cv;
 
 void img_zooming(Mat &, double, double);
 int img_rotation();
-int img_brightness();
-int img_contrast();
+void img_brightness(Mat &, float, float);
+void img_contrast(Mat &, float);
 void img_blurring(Mat &);
-int img_grayscale();
+void img_grayscale(Mat &);
 
 #endif

@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     printf("program starts:  \n");
     while (stop)
     {
-        printf("please select: 1.img_zooming  5.img_blurring  7.exit\n");  
+        printf("please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.exit\n");  
         scanf("%d",&selection); // need to check input , only accept number!
         //considering using enum
         switch (selection)
@@ -46,13 +46,16 @@ int main(int argc, char* argv[])
             case 2:
                 break;
             case 3:
+                img_brightness(image,1.5,10);
                 break;
             case 4:
+                img_contrast(image,50.f);
                 break;
             case 5:
                 img_blurring(image);
                 break;
             case 6:
+                img_grayscale(image);
                 break;
             case 7:
                 stop=false;
