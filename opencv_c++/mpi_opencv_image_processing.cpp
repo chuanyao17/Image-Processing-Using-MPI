@@ -43,6 +43,8 @@ int main(int argc, char** argv)
   { 
     // read the image
     image = cv::imread( "image.jpg", cv::IMREAD_UNCHANGED );
+    std::cout << "img_size " << image.size() << "img_type " << image.type() << std::endl; 
+
 
     // check if it's empty:
     if ( image.empty() ) 
@@ -53,10 +55,12 @@ int main(int argc, char** argv)
     
     // get the number of channels in the image
     channels = image.channels();
+    std::cout << "The channels " << channels << std::endl; 
 
     // get the total size of the image matrix (rows * columns * channels)
     // the explanation can be found here: https://stackoverflow.com/a/26441073/4003714 
     imageTotalSize = image.step[0] * image.rows;
+    std::cout << "The imageTotalSize " << imageTotalSize << std::endl;    
     
     // check if we can evenly divide the image bytes by the number of processes
     // the image.total() method returns the number of elements, i.e. (rows * cols)
@@ -134,7 +138,9 @@ int main(int argc, char** argv)
   // -----------------------------------------------------------------------------------------------------------------------------------------------
 
   // synchronize the image processing:
-  MPI_Barrier( MPI_COMM_WORLD );
+  // MPI_Barrier( MPI_COMM_WORLD );
+  // cv::Mat outImage_partial;
+  // outImage_partial= cv::Mat( image.size(),);
 
 
 
@@ -153,7 +159,7 @@ int main(int argc, char** argv)
   if ( rank == 0 ) 
   {
     // save the image:
-    cv::imwrite( "new_image.jpg", outImage );
+    // cv::imwrite( "new_image.jpg", outImage );
 
     // or show it on screen:
     /*while ( true ) 

@@ -1,0 +1,3 @@
+/home/chuanyao17/image-processing-using-mpi/test_folder/build/CMakeFiles/rebuild_cache.dir
+/home/chuanyao17/image-processing-using-mpi/test_folder/build/CMakeFiles/edit_cache.dir
+/home/chuanyao17/image-processing-using-mpi/test_folder/build/CMakeFiles/create_img.dir
