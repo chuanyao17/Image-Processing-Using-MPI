@@ -60,15 +60,15 @@ include CMakeFiles/create_img.dir/flags.make
 CMakeFiles/create_img.dir/create_img.cpp.o: CMakeFiles/create_img.dir/flags.make
 CMakeFiles/create_img.dir/create_img.cpp.o: ../create_img.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chuanyao17/image-processing-using-mpi/test_folder/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/create_img.dir/create_img.cpp.o"
-	/usr/bin/mpic++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/create_img.dir/create_img.cpp.o -c /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp
+	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/create_img.dir/create_img.cpp.o -c /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp
 
 CMakeFiles/create_img.dir/create_img.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/create_img.dir/create_img.cpp.i"
-	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp > CMakeFiles/create_img.dir/create_img.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp > CMakeFiles/create_img.dir/create_img.cpp.i
 
 CMakeFiles/create_img.dir/create_img.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/create_img.dir/create_img.cpp.s"
-	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp -o CMakeFiles/create_img.dir/create_img.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chuanyao17/image-processing-using-mpi/test_folder/create_img.cpp -o CMakeFiles/create_img.dir/create_img.cpp.s
 
 # Object files for target create_img
 create_img_OBJECTS = \

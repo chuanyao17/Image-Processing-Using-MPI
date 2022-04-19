@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     printf("No image data \n");
     return -1;
     }
-
+    // std::cout << "img_size " << image.size() << "img_type " << image.type() << std::endl; 
     //show the input image on the screen
     namedWindow("Display Image", WINDOW_AUTOSIZE);
     imshow("Display Image", image);

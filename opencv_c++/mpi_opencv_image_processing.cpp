@@ -43,7 +43,7 @@ int main(int argc, char** argv)
   { 
     // read the image
     image = cv::imread( "image.jpg", cv::IMREAD_UNCHANGED );
-    std::cout << "img_size " << image.size() << "img_type " << image.type() << std::endl; 
+    // std::cout << "img_size " << image.size() << "img_type " << image.type() << std::endl; 
 
 
     // check if it's empty:
@@ -171,7 +171,9 @@ int main(int argc, char** argv)
     }
     cv::destroyAllWindows();*/
     cv::imshow( "image", outImage );
+    // cv::waitKey(100);
     cv::waitKey(0);
+    cv::destroyAllWindows();
   }
   
   delete[]partialBuffer;

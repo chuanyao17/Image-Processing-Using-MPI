@@ -9,7 +9,29 @@ using namespace cv;
 int main()
 {
 	// 设置窗口
-	Mat img = Mat::zeros(Size(800, 600), CV_8UC3);
+	// Mat img = Mat::zeros(Size(300, 500), CV_8UC3);
+	// Mat img(300, 500, CV_8UC3);
+	// Mat img(300, 500, 16);
+	Mat img(2, 4, CV_8UC3);
+	// Mat img2 = Mat::zeros(Size(4, 2), CV_8UC3);
+	// Mat img2(2, 4, CV_8UC3);
+	Mat img2=img.clone();
+
+	std::cout << "img_size " << img.size() << "img_type " << img.type() << std::endl; 
+	cout<<img<<endl;
+	cout<<long(img.data)<<endl;
+	std::cout << "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
+	cout<<img2<<endl;
+	cout<<long(img2.data)<<endl;
+	
+	if (img.data==img2.data)
+	{
+		printf("yes\n");
+	}
+	else
+	{
+		printf("no\n");
+	}
 	
 	// img.setTo(255);              // 设置屏幕为白色
 	// Point p1(100, 100);          // 点p1
@@ -34,8 +56,8 @@ int main()
  
  
 	// 画矩形
-	Rect r(250, 250, 120, 200);
-	rectangle(img, r, Scalar(0, 255, 255), 3);
+	// Rect r(250, 250, 120, 200);
+	// rectangle(img, r, Scalar(0, 255, 255), 3);
  
 	imshow("board", img);
 	waitKey();

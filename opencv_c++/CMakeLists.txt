@@ -4,3 +4,8 @@ project( mpi_opencv_image_processing )
 find_package( OpenCV REQUIRED )
 add_executable( mpi_opencv_image_processing mpi_opencv_image_processing.cpp )
 target_link_libraries( mpi_opencv_image_processing ${OpenCV_LIBS} )
+
+# project( DisplayImage )
+# find_package( OpenCV REQUIRED )
+# add_executable( DisplayImage DisplayImage.cpp )
+# target_link_libraries( DisplayImage ${OpenCV_LIBS} )
