@@ -2,36 +2,127 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 #include <stdio.h>
- 
+#include <typeinfo> 
+
 using namespace std;
 using namespace cv;
  
 int main()
 {
 	// 设置窗口
-	// Mat img = Mat::zeros(Size(300, 500), CV_8UC3);
-	// Mat img(300, 500, CV_8UC3);
+	// Mat img = Mat::zeros(Size(5, 500), CV_8UC3);
+	Mat img(300, 100, CV_8UC3,Scalar(100,100,200));
 	// Mat img(300, 500, 16);
-	Mat img(2, 4, CV_8UC3);
-	// Mat img2 = Mat::zeros(Size(4, 2), CV_8UC3);
+	// Mat img(2, 4, CV_8UC3,Scalar(1,2,3));
+	// Mat img(2, 4, 0,Scalar(20));
+	// Mat img2 = Mat::zeros(Size(2, 4), CV_8UC3);
 	// Mat img2(2, 4, CV_8UC3);
-	Mat img2=img.clone();
+	// Mat img2=img.clone();
+	// Mat *img2;
+	// *img2=img;
+	imshow("board", img);
+	waitKey();
 
 	std::cout << "img_size " << img.size() << "img_type " << img.type() << std::endl; 
-	cout<<img<<endl;
+	// cout<<img<<endl;
 	cout<<long(img.data)<<endl;
-	std::cout << "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
-	cout<<img2<<endl;
-	cout<<long(img2.data)<<endl;
+	// cout<<img.at<cv::Vec3b>(1,3)<<endl;
+	// cout<<img.at<cv::Vec3b>(3,1)<<endl;
+	// cout<<(int)img.at<uchar>(3,1)<<endl;
+	// cout<<(int)img.at<uchar>(1,3)<<endl;
+	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<endl;
+	cout<<"test-loop"<<endl;
+
+	uchar test[90000];
+	cout<<long(test)<<endl;
+	for(int i=0;i<90000;i++)
+	{
+		if(i<30000)
+		{
+			test[i]=0;
+		}
+		else if(i<60000)
+		{
+			test[i]=100;
+		}
+		else
+		{
+			test[i]=255;
+		}
+	}
+	img.data=test;
+	// cout<<img<<endl;
+
+	std::cout << "img_size " << img.size() << "img_type " << img.type() << std::endl; 
+	cout<<long(img.data)<<endl;
+	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<endl;
+	cv::imwrite( "revised_image.jpg", img );
+
+	// //test pixel by for loop
+	// int row=img.rows;
+	// int channel=img.channels();
+	// int col=img.cols*channel;
+
+	// if(img.isContinuous())
+	// {
+	// 	cout<<"isContinuous"<<endl;
+	// }
+
+	// // cout<<(int)img.ptr<uchar>(0)<<" "<<(int)img.ptr<uchar>(0).name()<<endl;
+	// // cout<<img.ptr<cv::Vec3b>(0)<<" "<<img.ptr<cv::Vec3b>(0).name()<<endl;
+	// // cout<<(int)img.ptr(0)<<" "<<(int)img.ptr(0).name()<<endl;
+
+	// cout<<(long)(img.ptr<uchar>(0))<<endl;
+	// cout<<(long)(img.ptr<cv::Vec3b>(0))<<endl;
+	// cout<<(long)(img.ptr(0))<<endl;
+	// for(int i=0;i<row;i++)
+	// {
+	// 	uchar* data=img.ptr<uchar>(i);
+	// 	// cv::Vec3b* data=img.ptr<cv::Vec3b>(i);
+	// 	// cout<<data;
+	// 	for(int j=0;j<col;j++)
+	// 	{
+	// 		cout<<(int)data[j]<<"#";
+	// 		data[j]=255;
+	// 	}
+	// 	cout<<endl;
+	// }
+	// cout<<img<<endl;
+
+	// uchar* ptr_1d = img.data;
+	// cout<<long(ptr_1d)<<" "<<img.total()*img.channels()<<endl;
+	// for(int i=0;i<img.rows*img.cols*img.channels();i++)
+	// {
+	// 	ptr_1d[i]=33;
+	// 	cout<<(int)ptr_1d[i]<<" ";
+	// }
+	// cout<<endl;
+	// cout<<img<<endl;
+	// std::cout << "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
+	// cout<<img2<<endl;
+	// cout<<long(img2.data)<<endl;
 	
-	if (img.data==img2.data)
-	{
-		printf("yes\n");
-	}
-	else
-	{
-		printf("no\n");
-	}
+	// if (!cv::norm(img,img2,NORM_L1))
+	// {
+	// 	printf("yes\n");
+	// }
+	// else
+	// {
+	// 	printf("no\n");
+	// }
+
+	// std::cout << "img2_size " << (*img2).size() << "img2_type " << (*img2).type() << std::endl; 
+	// cout<<*img2<<endl;
+	// cout<<long((*img2).data)<<endl;
+	
+	// if (!cv::norm(img,*img2,NORM_L1))
+	// {
+	// 	printf("yes\n");
+	// }
+	// else
+	// {
+	// 	printf("no\n");
+	// }
 	
 	// img.setTo(255);              // 设置屏幕为白色
 	// Point p1(100, 100);          // 点p1
