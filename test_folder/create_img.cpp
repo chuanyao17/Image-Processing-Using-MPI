@@ -11,17 +11,25 @@ int main()
 {
 	// 设置窗口
 	// Mat img = Mat::zeros(Size(5, 500), CV_8UC3);
-	Mat img(300, 100, CV_8UC3,Scalar(100,100,200));
+	Mat img(210, 100, CV_8UC3,Scalar(100,100,200));
 	// Mat img(300, 500, 16);
 	// Mat img(2, 4, CV_8UC3,Scalar(1,2,3));
 	// Mat img(2, 4, 0,Scalar(20));
-	// Mat img2 = Mat::zeros(Size(2, 4), CV_8UC3);
-	// Mat img2(2, 4, CV_8UC3);
-	// Mat img2=img.clone();
+	int a=100;
+	int b=210;
+	Mat img2 = Mat::zeros(Size(a, b), CV_8UC3);
+	// Mat img2;
+	std::cout << "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
+	img2.data=img.data;
+	std::cout << "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
 	// Mat *img2;
 	// *img2=img;
-	imshow("board", img);
-	waitKey();
+	// imshow("board", img);
+	// waitKey();
+
+	imshow("board",img2);
+	waitKey(0);
+	
 
 	std::cout << "img_size " << img.size() << "img_type " << img.type() << std::endl; 
 	// cout<<img<<endl;
@@ -30,18 +38,19 @@ int main()
 	// cout<<img.at<cv::Vec3b>(3,1)<<endl;
 	// cout<<(int)img.at<uchar>(3,1)<<endl;
 	// cout<<(int)img.at<uchar>(1,3)<<endl;
-	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<endl;
+	int total_pix=img.channels()*img.total();
+	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<" total_pix= "<<total_pix<<endl;
 	cout<<"test-loop"<<endl;
 
-	uchar test[90000];
+	uchar test[total_pix];
 	cout<<long(test)<<endl;
-	for(int i=0;i<90000;i++)
+	for(int i=0;i<total_pix;i++)
 	{
-		if(i<30000)
+		if(i<total_pix/3)
 		{
 			test[i]=0;
 		}
-		else if(i<60000)
+		else if(i<total_pix/3*2)
 		{
 			test[i]=100;
 		}
@@ -55,7 +64,7 @@ int main()
 
 	std::cout << "img_size " << img.size() << "img_type " << img.type() << std::endl; 
 	cout<<long(img.data)<<endl;
-	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<endl;
+	cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<" total_pix= "<<total_pix<<endl;
 	cv::imwrite( "revised_image.jpg", img );
 
 	// //test pixel by for loop

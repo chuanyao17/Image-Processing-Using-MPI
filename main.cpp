@@ -48,8 +48,8 @@ int main(int argc, char* argv[])
         }
 
         //Display the window infinitely until any keypress
-        imshow("Display Image", img);
-        waitKey(0);
+        // imshow("Display Image", img);
+        // waitKey(0);
 
         img_row_num=img.rows;
         img_col_num=img.cols;
@@ -62,7 +62,64 @@ int main(int argc, char* argv[])
     MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     cout<<"rows= "<<img_row_num<<" cols= "<<img_col_num<<" channels= "<<img_ch_num<<" processor= "<<id<<endl;
 
+    int recv_counts;//Store the size of the sub image's data
+    int *send_counts = new int[p]; //Store the size of the assgined sublist of each process
+    int *send_index = new int[p]; //Store the start index of the assgined sublist of each process
+    for(int i = 0; i < p; i++) {
+        send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p))*img_col_num*img_ch_num;
+        send_index[i] = (((i*img_row_num)/p))*img_col_num*img_ch_num;
+        if (id==i)
+        {
+            recv_counts=send_counts[i];
+            cout<<"id= "<<id<<" "<<"counts= "<<recv_counts<<endl;
+            
+        }
+    }
+    uchar *sub_img_buffer=new uchar[recv_counts]; //Store the distributed sub image's data of each process
+    Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Store the sub image
+    cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() << std::endl;
     
+    
+    //check *send_counts and * send_index
+    if(id==0)
+    {
+        cout<<"send_counts= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_counts[i]<<" ";
+        }
+        cout<<endl;
+        cout<<"send_index= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_index[i]<<" ";
+        }
+        cout<<endl;
+
+    }
+
+    //Assign the sublist from process 0 to each process
+    MPI_Scatterv(img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    
+    // sub_img.data=sub_img_buffer;
+	// imshow("Display Image", sub_img);
+    // waitKey(0);
+
+    // cv::Mat outImage;
+    // if (id==0) 
+    // { 
+    //     outImage = cv::Mat( img.size(), img.type() );
+    // }
+    // MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, outImage.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    
+    //Send the sub images' buffers back to the process 0, gathering the complete image
+    MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+    if (id==0)
+    {
+        imshow("Display Image", img);
+        waitKey(0);
+    }
     
     
     // printf("program starts:  \n");
