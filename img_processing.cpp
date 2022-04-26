@@ -4,6 +4,7 @@
 #include "opencv2/opencv.hpp"
 
 using namespace cv;
+using namespace std;
 
 void img_zooming(Mat &src, double kx, double ky)
 {

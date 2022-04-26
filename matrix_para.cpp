@@ -28,3 +28,35 @@ uchar* distribute_image(int &p, int &id, int &img_row_num, int &img_col_num, int
     MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     return sub_img_buffer;
 }
+
+void update_image_properties(int &id, Mat &img, int &img_row_num, int &img_col_num, int &img_ch_num)
+{
+    if(id==0)
+    {
+        img_row_num=img.rows;
+        img_col_num=img.cols;
+        img_ch_num=img.channels();
+    }
+    MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+}
+
+void print_send_buffers(int &id, int &p, int *send_counts , int *send_index)
+{
+    if(id==0)
+    {
+        cout<<"send_counts= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_counts[i]<<" ";
+        }
+        cout<<endl;
+        cout<<"send_index= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_index[i]<<" ";
+        }
+        cout<<endl;
+    }
+}

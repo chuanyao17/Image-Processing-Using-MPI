@@ -57,15 +57,16 @@ int main(int argc, char* argv[])
         // imshow("Display Image", img);
         // waitKey(0);
 
-        img_row_num=img.rows;
-        img_col_num=img.cols;
-        img_ch_num=img.channels();
+        // img_row_num=img.rows;
+        // img_col_num=img.cols;
+        // img_ch_num=img.channels();
 
     }
-    //Send the image properties from the ROOT to other processes:
-    MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
-    MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
-    MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    //Send the image properties from the ROOT to other processes
+    // MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    // MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    // MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
     cout<<"rows= "<<img_row_num<<" cols= "<<img_col_num<<" channels= "<<img_ch_num<<" processor= "<<id<<endl;
 
     //Initialize the sub-image
@@ -87,23 +88,23 @@ int main(int argc, char* argv[])
     // MPI_Scatterv(img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     
     //check *send_counts and * send_index
-    if(id==0)
-    {
-        cout<<"send_counts= ";
-        for(int i=0;i<p;i++)
-        {
-            cout<<send_counts[i]<<" ";
-        }
-        cout<<endl;
-        cout<<"send_index= ";
-        for(int i=0;i<p;i++)
-        {
-            cout<<send_index[i]<<" ";
-        }
-        cout<<endl;
+    // if(id==0)
+    // {
+    //     cout<<"send_counts= ";
+    //     for(int i=0;i<p;i++)
+    //     {
+    //         cout<<send_counts[i]<<" ";
+    //     }
+    //     cout<<endl;
+    //     cout<<"send_index= ";
+    //     for(int i=0;i<p;i++)
+    //     {
+    //         cout<<send_index[i]<<" ";
+    //     }
+    //     cout<<endl;
 
-    }
-
+    // }
+    print_send_buffers(id, p, send_counts , send_index);
     
     
     // sub_img.data=sub_img_buffer;
