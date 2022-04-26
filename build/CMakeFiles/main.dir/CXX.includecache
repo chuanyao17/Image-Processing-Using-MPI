@@ -47,6 +47,8 @@ matrix_para.h
 /home/chuanyao17/image-processing-using-mpi/matrix_para.h
 
 /home/chuanyao17/image-processing-using-mpi/matrix_para.h
+opencv2/opencv.hpp
+/home/chuanyao17/image-processing-using-mpi/opencv2/opencv.hpp
 
 /usr/local/include/opencv4/opencv2/calib3d.hpp
 opencv2/core.hpp

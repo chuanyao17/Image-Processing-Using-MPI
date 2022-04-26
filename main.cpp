@@ -20,12 +20,11 @@ int main(int argc, char* argv[])
 
     int p, id; //The number of the processes and thier id
 
-    int *send_counts; //Store the size of the assgined sublist of each process
-    int *send_index; //Store the start index of the assgined sublist of each process
-    
+    int *send_counts; //Store the size of the assgined sub-image of each process
+    int *send_index; //Store the start index of the assgined sub-image of each process
     
     int recv_counts; //Store the size of the sub image's data
-    uchar *sub_img_buffer; //Store the distributed sub image's data of each process
+    uchar *sub_img_buffer; //Store the distributed sub-image's data of each process
 
     MPI_Status status;
     MPI_Init(&argc, &argv);
@@ -72,13 +71,20 @@ int main(int argc, char* argv[])
     //Initialize the sub-image
     send_counts = new int[p]; 
     send_index = new int[p]; 
-    create_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    sub_img_buffer=distribute_image(p, id, img_row_num, img_col_num, img_ch_num, send_counts , send_index, recv_counts, img.data);
+    // create_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
     
-    recv_counts=send_counts[id];
-    sub_img_buffer=new uchar[recv_counts]; 
-    Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Construct the sub image with (assigned row, image's col number, 3 channels)
-    cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() << std::endl;
+    // recv_counts=send_counts[id];
+    // sub_img_buffer=new uchar[recv_counts]; 
+    // Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Construct the sub image with (assigned row, image's col number, 3 channels)
+    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<endl;
+
     
+
+    
+    
+    //Assign the sublist from process 0 to each process
+    // MPI_Scatterv(img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     
     //check *send_counts and * send_index
     if(id==0)
@@ -98,8 +104,7 @@ int main(int argc, char* argv[])
 
     }
 
-    //Assign the sublist from process 0 to each process
-    MPI_Scatterv(img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    
     
     // sub_img.data=sub_img_buffer;
 	// imshow("Display Image", sub_img);
@@ -112,7 +117,7 @@ int main(int argc, char* argv[])
     // }
     // MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, outImage.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     
-    
+
     //Send the sub images' buffers back to the process 0, gathering the complete image
     MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
