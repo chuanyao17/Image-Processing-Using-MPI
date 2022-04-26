@@ -11,6 +11,6 @@ int img_rotation();
 void img_brightness(Mat &, float, float);
 void img_contrast(Mat &, float);
 void img_blurring(Mat &);
-void img_grayscale(Mat &);
+void img_grayscale(int &, int &, int *, int *, Mat &);
 
 #endif

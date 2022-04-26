@@ -14,17 +14,17 @@ int main(int argc, char* argv[])
     
     Mat img; //Store the input image
     Mat prev_img; //Store the previous modified image
-    int img_row_num; //Store the number of the input image's row
-    int img_col_num; //Store the number of the input image's col
-    int img_ch_num; //Store the number of the input image's channel
+    // int img_row_num; //Store the number of the input image's row
+    // int img_col_num; //Store the number of the input image's col
+    // int img_ch_num; //Store the number of the input image's channel
 
     int p, id; //The number of the processes and thier id
 
     int *send_counts; //Store the size of the assgined sub-image of each process
     int *send_index; //Store the start index of the assgined sub-image of each process
     
-    int recv_counts; //Store the size of the sub image's data
-    uchar *sub_img_buffer; //Store the distributed sub-image's data of each process
+    
+    // uchar *sub_img_buffer; //Store the distributed sub-image's data of each process
 
     MPI_Status status;
     MPI_Init(&argc, &argv);
@@ -66,13 +66,13 @@ int main(int argc, char* argv[])
     // MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     // MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     // MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
-    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
-    cout<<"rows= "<<img_row_num<<" cols= "<<img_col_num<<" channels= "<<img_ch_num<<" processor= "<<id<<endl;
+    // update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+    // cout<<"rows= "<<img_row_num<<" cols= "<<img_col_num<<" channels= "<<img_ch_num<<" processor= "<<id<<endl;
 
     //Initialize the sub-image
     send_counts = new int[p]; 
     send_index = new int[p]; 
-    sub_img_buffer=distribute_image(p, id, img_row_num, img_col_num, img_ch_num, send_counts , send_index, recv_counts, img.data);
+    // sub_img_buffer=distribute_image(p, id, img_row_num, img_col_num, img_ch_num, send_counts , send_index, img.data);
     // create_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
     
     // recv_counts=send_counts[id];
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     //     cout<<endl;
 
     // }
-    print_send_buffers(id, p, send_counts , send_index);
+    // print_send_buffers(id, p, send_counts , send_index);
     
     
     // sub_img.data=sub_img_buffer;
@@ -120,15 +120,22 @@ int main(int argc, char* argv[])
     
 
     //Send the sub images' buffers back to the process 0, gathering the complete image
-    MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    // MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
+    // if (id==0)
+    // {
+    //     imshow("Display Image", img);
+    //     waitKey(0);
+    // }
+    
+    
+    img_grayscale(p, id, send_counts , send_index, img);
     if (id==0)
     {
         imshow("Display Image", img);
         waitKey(0);
+        imwrite( "gray_image.jpg", img );
     }
-    
-    
     // printf("program starts:  \n");
     // while (stop)
     // {
