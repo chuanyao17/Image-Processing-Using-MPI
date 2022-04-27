@@ -1,5 +1,7 @@
 #ifndef __IMG_PROCESSING_H__
 #define __IMG_PROCESSING_H__
+
+#include "matrix_para.h"
 #include "opencv2/opencv.hpp"
 
 using namespace cv;

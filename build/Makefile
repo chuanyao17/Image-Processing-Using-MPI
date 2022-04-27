@@ -123,6 +123,33 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+img_mpi.o: img_mpi.cpp.o
+
+.PHONY : img_mpi.o
+
+# target to build an object file
+img_mpi.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/img_mpi.cpp.o
+.PHONY : img_mpi.cpp.o
+
+img_mpi.i: img_mpi.cpp.i
+
+.PHONY : img_mpi.i
+
+# target to preprocess a source file
+img_mpi.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/img_mpi.cpp.i
+.PHONY : img_mpi.cpp.i
+
+img_mpi.s: img_mpi.cpp.s
+
+.PHONY : img_mpi.s
+
+# target to generate assembly for a file
+img_mpi.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/img_mpi.cpp.s
+.PHONY : img_mpi.cpp.s
+
 img_processing.o: img_processing.cpp.o
 
 .PHONY : img_processing.o
@@ -177,33 +204,6 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-matrix_para.o: matrix_para.cpp.o
-
-.PHONY : matrix_para.o
-
-# target to build an object file
-matrix_para.cpp.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/matrix_para.cpp.o
-.PHONY : matrix_para.cpp.o
-
-matrix_para.i: matrix_para.cpp.i
-
-.PHONY : matrix_para.i
-
-# target to preprocess a source file
-matrix_para.cpp.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/matrix_para.cpp.i
-.PHONY : matrix_para.cpp.i
-
-matrix_para.s: matrix_para.cpp.s
-
-.PHONY : matrix_para.s
-
-# target to generate assembly for a file
-matrix_para.cpp.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/matrix_para.cpp.s
-.PHONY : matrix_para.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -213,15 +213,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... main"
+	@echo "... img_mpi.o"
+	@echo "... img_mpi.i"
+	@echo "... img_mpi.s"
 	@echo "... img_processing.o"
 	@echo "... img_processing.i"
 	@echo "... img_processing.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... matrix_para.o"
-	@echo "... matrix_para.i"
-	@echo "... matrix_para.s"
 .PHONY : help
 
 

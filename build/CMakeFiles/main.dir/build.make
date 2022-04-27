@@ -83,31 +83,31 @@ CMakeFiles/main.dir/img_processing.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/img_processing.cpp.s"
 	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chuanyao17/image-processing-using-mpi/img_processing.cpp -o CMakeFiles/main.dir/img_processing.cpp.s
 
-CMakeFiles/main.dir/matrix_para.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/matrix_para.cpp.o: ../matrix_para.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/matrix_para.cpp.o"
-	/usr/bin/mpic++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/matrix_para.cpp.o -c /home/chuanyao17/image-processing-using-mpi/matrix_para.cpp
+CMakeFiles/main.dir/img_mpi.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/img_mpi.cpp.o: ../img_mpi.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/img_mpi.cpp.o"
+	/usr/bin/mpic++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/main.dir/img_mpi.cpp.o -c /home/chuanyao17/image-processing-using-mpi/img_mpi.cpp
 
-CMakeFiles/main.dir/matrix_para.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/matrix_para.cpp.i"
-	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/chuanyao17/image-processing-using-mpi/matrix_para.cpp > CMakeFiles/main.dir/matrix_para.cpp.i
+CMakeFiles/main.dir/img_mpi.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/img_mpi.cpp.i"
+	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/chuanyao17/image-processing-using-mpi/img_mpi.cpp > CMakeFiles/main.dir/img_mpi.cpp.i
 
-CMakeFiles/main.dir/matrix_para.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/matrix_para.cpp.s"
-	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chuanyao17/image-processing-using-mpi/matrix_para.cpp -o CMakeFiles/main.dir/matrix_para.cpp.s
+CMakeFiles/main.dir/img_mpi.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/img_mpi.cpp.s"
+	/usr/bin/mpic++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/chuanyao17/image-processing-using-mpi/img_mpi.cpp -o CMakeFiles/main.dir/img_mpi.cpp.s
 
 # Object files for target main
 main_OBJECTS = \
 "CMakeFiles/main.dir/main.cpp.o" \
 "CMakeFiles/main.dir/img_processing.cpp.o" \
-"CMakeFiles/main.dir/matrix_para.cpp.o"
+"CMakeFiles/main.dir/img_mpi.cpp.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
 
 main: CMakeFiles/main.dir/main.cpp.o
 main: CMakeFiles/main.dir/img_processing.cpp.o
-main: CMakeFiles/main.dir/matrix_para.cpp.o
+main: CMakeFiles/main.dir/img_mpi.cpp.o
 main: CMakeFiles/main.dir/build.make
 main: /usr/local/lib/libopencv_gapi.so.4.5.5
 main: /usr/local/lib/libopencv_stitching.so.4.5.5

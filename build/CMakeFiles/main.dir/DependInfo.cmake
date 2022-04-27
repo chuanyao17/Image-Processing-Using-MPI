@@ -4,9 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/chuanyao17/image-processing-using-mpi/img_mpi.cpp" "/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles/main.dir/img_mpi.cpp.o"
   "/home/chuanyao17/image-processing-using-mpi/img_processing.cpp" "/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles/main.dir/img_processing.cpp.o"
   "/home/chuanyao17/image-processing-using-mpi/main.cpp" "/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles/main.dir/main.cpp.o"
-  "/home/chuanyao17/image-processing-using-mpi/matrix_para.cpp" "/home/chuanyao17/image-processing-using-mpi/build/CMakeFiles/main.dir/matrix_para.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

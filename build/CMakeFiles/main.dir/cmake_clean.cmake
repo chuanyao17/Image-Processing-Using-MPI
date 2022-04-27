@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/main.dir/img_mpi.cpp.o"
   "CMakeFiles/main.dir/img_processing.cpp.o"
   "CMakeFiles/main.dir/main.cpp.o"
-  "CMakeFiles/main.dir/matrix_para.cpp.o"
   "main"
   "main.pdb"
 )

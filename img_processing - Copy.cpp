@@ -1,10 +1,9 @@
+#include "img_processing.h"
 #include <iostream>
 #include <cstdio>
 #include "mpi.h"
 #include "opencv2/opencv.hpp"
 #include <math.h> 
-#include "img_processing.h"
-#include "img_mpi.h"
 
 using namespace cv;
 using namespace std;
@@ -231,7 +230,6 @@ void img_grayscale(int &p, int &id, int *send_counts , int *send_index, Mat &img
 	// cout<<"id= "<<id<<" tmp= "<<tmp<<endl;
 	// imwrite( tmp, sub_img);
 
-	//Send the sub images' buffers back to the process 0, gathering the complete image
 	MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     delete[] sub_img_buffer;
