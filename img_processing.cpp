@@ -3,9 +3,18 @@
 #include <cstdio>
 #include "mpi.h"
 #include "opencv2/opencv.hpp"
+#include <math.h> 
 
 using namespace cv;
 using namespace std;
+
+Vec3b bilinear_interpolation(Mat &img, double &i, double &j)
+{
+	double a=i-floor(i); //weighted i
+	double b=j-floor(j); //weighted j
+
+	return (1-a)*(1-b)*img.at<cv::Vec3b>(floor(i), floor(j))+a*(1-b)*img.at<cv::Vec3b>(floor(i)+1, floor(j))+a*b*img.at<cv::Vec3b>(floor(i)+1, floor(j)+1)+(1-a)*(b)*img.at<cv::Vec3b>(floor(i), floor(j)+1);
+}
 
 void img_zooming(Mat &src, double kx, double ky)
 {
@@ -17,16 +26,16 @@ void img_zooming(Mat &src, double kx, double ky)
 	
     for (int i = 0; i < row; i++)
 	{
-		int srx = i / kx;
+		double srx = i / kx;
 		for (int j = 0; j < col; j++)
 		{
-			int sry = j /ky;
-			dst.at<cv::Vec3b>(i, j) = src.at<cv::Vec3b>(srx, sry);
+			double sry = j /ky;
+			dst.at<cv::Vec3b>(i, j) = bilinear_interpolation(src, srx, sry);
 		}
 	}
-	cv::imwrite("../zoomed.jpg", dst);
-    // cv::imshow( "image", dst );
-    // cv::waitKey(0);
+	// cv::imwrite("../zoomed.jpg", dst);
+    cv::imshow( "image", dst );
+    cv::waitKey(0);
     return; 
 }
 int img_rotation()
@@ -217,6 +226,9 @@ void img_grayscale(int &p, int &id, int *send_counts , int *send_index, Mat &img
 	// sub_img.data=sub_img_buffer;
 	// imshow("Display Image", sub_img);
     // waitKey(0);
+	// string tmp=to_string(id)+"gray_image.jpg";
+	// cout<<"id= "<<id<<" tmp= "<<tmp<<endl;
+	// imwrite( tmp, sub_img);
 
 	MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 

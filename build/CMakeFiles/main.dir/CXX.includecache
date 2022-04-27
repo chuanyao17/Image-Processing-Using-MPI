@@ -17,6 +17,8 @@ mpi.h
 /home/chuanyao17/image-processing-using-mpi/mpi.h
 opencv2/opencv.hpp
 /home/chuanyao17/image-processing-using-mpi/opencv2/opencv.hpp
+math.h
+-
 
 /home/chuanyao17/image-processing-using-mpi/img_processing.h
 matrix_para.h

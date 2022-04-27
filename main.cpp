@@ -53,9 +53,9 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-        //Display the window infinitely until any keypress
-        // imshow("Display Image", img);
-        // waitKey(0);
+        // Display the window infinitely until any keypress
+        imshow("image", img);
+        waitKey(0);
 
         // img_row_num=img.rows;
         // img_col_num=img.cols;
@@ -129,13 +129,15 @@ int main(int argc, char* argv[])
     // }
     
     
-    img_grayscale(p, id, send_counts , send_index, img);
-    if (id==0)
-    {
-        imshow("Display Image", img);
-        waitKey(0);
-        imwrite( "gray_image.jpg", img );
-    }
+    // img_grayscale(p, id, send_counts , send_index, img);
+    // if (id==0)
+    // {
+    //     imshow("Display Image", img);
+    //     waitKey(0);
+    //     imwrite( "gray_image.jpg", img );
+    // }
+
+    img_zooming(img,0.5,2);
     // printf("program starts:  \n");
     // while (stop)
     // {

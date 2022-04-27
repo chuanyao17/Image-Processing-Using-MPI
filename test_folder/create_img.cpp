@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <typeinfo> 
+#include <math.h> 
 
 using namespace std;
 using namespace cv;
@@ -11,63 +12,72 @@ int main()
 {
 	// 设置窗口
 	// Mat img = Mat::zeros(Size(5, 500), CV_8UC3);
-	Mat img(210, 100, CV_8UC3,Scalar(100,100,200));
+	Mat img(210, 100, CV_8UC3,Scalar(100,100,100));
 	// Mat img(300, 500, 16);
 	// Mat img(2, 4, CV_8UC3,Scalar(1,2,3));
 	// Mat img(2, 4, 0,Scalar(20));
-	int a=100;
-	int b=110;
-	Mat img2 = Mat::zeros(Size(a, b), CV_8UC3);
+	// int a=100;
+	// int b=110;
+	// Mat img2 = Mat::zeros(Size(a, b), CV_8UC3);
 	// Mat img2;
-	std::cout <<"Origin img2 "<< "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
-	imshow("board",img2);
+	// std::cout <<"Origin img2 "<< "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
+	imshow("board",img);
 	waitKey(0);
 	// img2.data=img.data;
-	img2=cv::Mat( img.size(), img.type() );
-	std::cout <<"Copied img2 "<< "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
-	imshow("board",img2);
-	waitKey(0);
+	// img2=cv::Mat( img.size(), img.type() );
+	// std::cout <<"Copied img2 "<< "img2_size " << img2.size() << "img2_type " << img2.type() << std::endl; 
+	// imshow("board",img2);
+	// waitKey(0);
 	// Mat *img2;
 	// *img2=img;
 	
-
+	for (int i=0; i<img.rows;i++)
+	{
+		for(int j=0; j<img.cols;j++)
+		{
+			img.at<cv::Vec3b>(i, j)=img.at<cv::Vec3b>(i, j)+img.at<cv::Vec3b>(i, j);
+		}
+	}
 	
-	
+	int b=3;
+	double c=2;
+	double a=b/c;
+	cout<<a<<endl;
 
-	std::cout <<"Origin img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 
-	imshow("board", img);
-	waitKey(0);
+	// std::cout <<"Origin img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 
+	// imshow("board", img);
+	// waitKey(0);
 	// cout<<img<<endl;
 	// cout<<long(img.data)<<endl;
 	// cout<<img.at<cv::Vec3b>(1,3)<<endl;
 	// cout<<img.at<cv::Vec3b>(3,1)<<endl;
 	// cout<<(int)img.at<uchar>(3,1)<<endl;
 	// cout<<(int)img.at<uchar>(1,3)<<endl;
-	int total_pix=img.channels()*img.total();
+	// int total_pix=img.channels()*img.total();
 	// cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<" total_pix= "<<total_pix<<endl;
-	cout<<"test-loop"<<endl;
+	// cout<<"test-loop"<<endl;
 
-	uchar *test=new uchar[total_pix];
+	// uchar *test=new uchar[total_pix];
 	// cout<<long(test)<<endl;
-	for(int i=0;i<total_pix;i++)
-	{
-		if(i<total_pix/3)
-		{
-			test[i]=0;
-		}
-		else if(i<total_pix/3*2)
-		{
-			test[i]=100;
-		}
-		else
-		{
-			test[i]=255;
-		}
-	}
-	img.data=test;
+	// for(int i=0;i<total_pix;i++)
+	// {
+	// 	if(i<total_pix/3)
+	// 	{
+	// 		test[i]=0;
+	// 	}
+	// 	else if(i<total_pix/3*2)
+	// 	{
+	// 		test[i]=100;
+	// 	}
+	// 	else
+	// 	{
+	// 		test[i]=255;
+	// 	}
+	// }
+	// img.data=test;
 	// cout<<img<<endl;
 
-	std::cout <<"Copied img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 
+	// std::cout <<"Copied img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 
 	// cout<<long(img.data)<<endl;
 	// cout<<"rows= "<<img.rows<<" cols= "<<img.cols<<" channels= "<<img.channels()<<" total= "<<img.total()<<" total_pix= "<<total_pix<<endl;
 	// cv::imwrite( "revised_image.jpg", img );
