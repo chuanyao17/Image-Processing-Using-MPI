@@ -11,6 +11,6 @@ Mat distribute_image(const int &, const int &, const int &, const int &, const i
 void update_image_properties(const int &, const Mat &, int &, int &, int &); //Send the image properties from the ROOT to other processes
 void print_send_buffers(const int &, const int &, int * , int *); //check *send_counts and * send_index
 int read_selection(const int &id); //Send the selection from the ROOT to other processes
-Mat img_grayscale_mpi(const int &, const int &, int *, int *, const Mat &); 
+void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &); 
 
 #endif

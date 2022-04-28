@@ -24,16 +24,16 @@ Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_n
     
     
     // update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-    int recv_counts=send_counts[id];
-    uchar *sub_img_buffer=new uchar[recv_counts]; 
+    int recv_counts=send_counts[id]; //Store the size of the sub image's data
+    // uchar *sub_img_buffer=new uchar[recv_counts]; 
     
     Mat sub_img(recv_counts/(img_col_num*img_ch_num),img_col_num,CV_8UC3); //Construct the sub image with (assigned rows, image's col number, 3 channels)
     
     //Assign the sublist from process 0 to each process
-    MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
-    sub_img.data=sub_img_buffer;
-    delete[] sub_img_buffer;
+    // sub_img.data=sub_img_buffer;
+    // delete[] sub_img_buffer;
     return sub_img;
 }
 
@@ -88,21 +88,24 @@ int read_selection(const int &id)
     return selection;
 }
 
-Mat img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, const Mat &img)
+void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
     printf("img_grayscale is working\n");
 
     int img_row_num; //Store the number of the input image's row
     int img_col_num; //Store the number of the input image's col
     int img_ch_num; //Store the number of the input image's channel
-	int recv_counts; //Store the size of the sub image's data
 	Mat sub_img; //Store the distributed sub-image
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 	
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
-    cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+    // imshow("image", sub_img);
+    // waitKey(0);
+    // destroyAllWindows();
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
-    return img;
+    return;
 }

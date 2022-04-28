@@ -167,77 +167,77 @@ void img_blurring(Mat &src)
 	return;
 }
 
-void img_grayscale(int &p, int &id, int *send_counts , int *send_index, Mat &img)
-{
-    // printf("img_grayscale is working\n");
-    // // Mat temp = src.clone();
-	// // int row = src.rows;
-	// // int col = src.cols;
-	// // for (int i = 0; i < row; ++i)
-	// // {
-	// // 	uchar *t = temp.ptr<uchar>(i);
-	// // 	uchar *s = src.ptr<uchar>(i);
-	// // 	for (int j = 0; j < col; ++j)
-	// // 	{
-	// // 		uchar b = s[3 * j];
-	// // 		uchar g = s[3 * j + 1];
-	// // 		uchar r = s[3 * j + 2];
-	// // 		int gray_pixel;
+// void img_grayscale(int &p, int &id, int *send_counts , int *send_index, Mat &img)
+// {
+    
+//     // Mat temp = src.clone();
+// 	// int row = src.rows;
+// 	// int col = src.cols;
+// 	// for (int i = 0; i < row; ++i)
+// 	// {
+// 	// 	uchar *t = temp.ptr<uchar>(i);
+// 	// 	uchar *s = src.ptr<uchar>(i);
+// 	// 	for (int j = 0; j < col; ++j)
+// 	// 	{
+// 	// 		uchar b = s[3 * j];
+// 	// 		uchar g = s[3 * j + 1];
+// 	// 		uchar r = s[3 * j + 2];
+// 	// 		int gray_pixel;
 
-	// // 		gray_pixel= r*0.299 + g*0.587 +b*0.114;
+// 	// 		gray_pixel= r*0.299 + g*0.587 +b*0.114;
 			
-	// // 		gray_pixel = max(0, min(255, gray_pixel));
-	// // 		t[3 * j + 2] = static_cast<uchar>(gray_pixel);
-	// // 		t[3 * j + 1] = static_cast<uchar>(gray_pixel);
-	// // 		t[3 * j] = static_cast<uchar>(gray_pixel);
-	// // 	}
-	// // }
-	// int img_row_num; //Store the number of the input image's row
-    // int img_col_num; //Store the number of the input image's col
-    // int img_ch_num; //Store the number of the input image's channel
-	// int recv_counts; //Store the size of the sub image's data
-	// uchar *sub_img_buffer; //Store the distributed sub-image's data of each process
+// 	// 		gray_pixel = max(0, min(255, gray_pixel));
+// 	// 		t[3 * j + 2] = static_cast<uchar>(gray_pixel);
+// 	// 		t[3 * j + 1] = static_cast<uchar>(gray_pixel);
+// 	// 		t[3 * j] = static_cast<uchar>(gray_pixel);
+// 	// 	}
+// 	// }
+// 	int img_row_num; //Store the number of the input image's row
+//     int img_col_num; //Store the number of the input image's col
+//     int img_ch_num; //Store the number of the input image's channel
+// 	int recv_counts; //Store the size of the sub image's data
+// 	uchar *sub_img_buffer; //Store the distributed sub-image's data of each process
 
-	// update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+// 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
 	
-	// sub_img_buffer=distribute_image(p, id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data, recv_counts);
+// 	sub_img_buffer=distribute_image(p, id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data, recv_counts);
 
 	
-	// uchar gray;
-	// uchar b;
-	// uchar g;
-	// uchar r;
-	// for ( int i = 0; i < recv_counts; i += img_ch_num )
-	// {
-	// 	// get the pixel:
-	// 	b = sub_img_buffer[i];
-	// 	g = sub_img_buffer[i+1];
-	// 	r = sub_img_buffer[i+2];
+// 	uchar gray;
+// 	uchar b;
+// 	uchar g;
+// 	uchar r;
+// 	for ( int i = 0; i < recv_counts; i += img_ch_num )
+// 	{
+// 		// get the pixel:
+// 		b = sub_img_buffer[i];
+// 		g = sub_img_buffer[i+1];
+// 		r = sub_img_buffer[i+2];
 
-	// 	gray=r*0.299 + g*0.587 +b*0.114;
+// 		gray=r*0.299 + g*0.587 +b*0.114;
 		
-	// 	// for example, swap the blue and the red:
-	// 	sub_img_buffer[i]=gray;
-	// 	sub_img_buffer[i+1]=gray;
-	// 	sub_img_buffer[i+2]=gray;
-	// }
+// 		// for example, swap the blue and the red:
+// 		sub_img_buffer[i]=gray;
+// 		sub_img_buffer[i+1]=gray;
+// 		sub_img_buffer[i+2]=gray;
+// 	}
 	
-	// // Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Construct the sub image with (assigned row, image's col number, 3 channels)
-    // // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<endl;
-	// // sub_img.data=sub_img_buffer;
-	// // imshow("Display Image", sub_img);
-    // // waitKey(0);
-	// // string tmp=to_string(id)+"gray_image.jpg";
-	// // cout<<"id= "<<id<<" tmp= "<<tmp<<endl;
-	// // imwrite( tmp, sub_img);
+// 	// Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Construct the sub image with (assigned row, image's col number, 3 channels)
+//     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<endl;
+// 	// sub_img.data=sub_img_buffer;
+// 	// imshow("Display Image", sub_img);
+//     // waitKey(0);
+// 	// string tmp=to_string(id)+"gray_image.jpg";
+// 	// cout<<"id= "<<id<<" tmp= "<<tmp<<endl;
+// 	// imwrite( tmp, sub_img);
 
-	// //Send the sub images' buffers back to the process 0, gathering the complete image
-	// MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+// 	//Send the sub images' buffers back to the process 0, gathering the complete image
+// 	MPI_Gatherv(sub_img_buffer, recv_counts, MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
-    // delete[] sub_img_buffer;
+//     delete[] sub_img_buffer;
 
-	// // imshow("grayscale", temp);
-	// // waitKey(0);
-    // // destroyAllWindows();
-	// return;
-}
+// 	// imshow("grayscale", temp);
+// 	// waitKey(0);
+//     // destroyAllWindows();
+// 	return;
+// }

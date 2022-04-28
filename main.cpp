@@ -62,15 +62,6 @@ int main(int argc, char* argv[])
     //Initialize the sending buffers as communication_arrays for MPI
     send_counts = new int[p]; 
     send_index = new int[p]; 
-
-    
-    // recv_counts=send_counts[id];
-    // sub_img_buffer=new uchar[recv_counts]; 
-    // Mat sub_img((((id+1)*img_row_num)/p)-((id*img_row_num)/p),img_col_num,CV_8UC3); //Construct the sub image with (assigned row, image's col number, 3 channels)
-    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<endl;    
-    // sub_img.data=sub_img_buffer;
-	// imshow("Display Image", sub_img);
-    // waitKey(0);
     
     
     // img_grayscale(p, id, send_counts , send_index, img);
@@ -101,7 +92,7 @@ int main(int argc, char* argv[])
             case 6:
                 //Initialize the previous image to be the input image
                 prev_img=img; 
-                img=img_grayscale_mpi(p, id, send_counts , send_index, img);
+                img_grayscale_mpi(p, id, send_counts , send_index, img);
                 break;
             case 7:
                 stop=false;
