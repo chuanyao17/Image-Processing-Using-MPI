@@ -6,10 +6,11 @@
 using namespace cv;
 
 
-void create_communication_arrays (int &, int &, int &, int &, int *, int *); //create_communication_arrays() initialize arrays to pass to MPI gather/scatterv
-uchar* distribute_image(int &, int &, int &, int &, int &, int *, int *, uchar *, int &); //distribute the input image among each processor 
-void update_image_properties(int &, Mat &, int &, int &, int &); //Send the image properties from the ROOT to other processes
-void print_send_buffers(int &, int &, int * , int *); //check *send_counts and * send_index
-int read_selection(int &id); //Send the selection from the ROOT to other processes
+void update_communication_arrays (const int &, const int &, const int &, const int &, int *, int *); //create_communication_arrays() initialize arrays to pass to MPI gather/scatterv
+Mat distribute_image(const int &, const int &, const int &, const int &, const int *, const int *, const uchar *); //distribute the input image among each processor 
+void update_image_properties(const int &, const Mat &, int &, int &, int &); //Send the image properties from the ROOT to other processes
+void print_send_buffers(const int &, const int &, int * , int *); //check *send_counts and * send_index
+int read_selection(const int &id); //Send the selection from the ROOT to other processes
+Mat img_grayscale_mpi(const int &, const int &, int *, int *, const Mat &); 
 
 #endif

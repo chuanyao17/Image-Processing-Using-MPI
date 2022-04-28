@@ -4,12 +4,12 @@
 
 using namespace cv;
 
-void img_zooming(Mat &, double, double);
+void img_zooming(const Mat &, double, double);
 int img_rotation();
 void img_brightness(Mat &, float, float);
 void img_contrast(Mat &, float);
 void img_blurring(Mat &);
-void img_grayscale(int &, int &, int *, int *, Mat &);
-Vec3b bilinear_interpolation(Mat &, double &, double &);
+// void img_grayscale(int &, int &, int *, int *, Mat &);
+Vec3b bilinear_interpolation(const Mat &, double &, double &);
 
 #endif

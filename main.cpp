@@ -50,13 +50,16 @@ int main(int argc, char* argv[])
             return -1;
         }
         cout<<"program starts:  "<<endl;
-        // Display the window infinitely until any keypress
+
+        
+
+        //Display the window infinitely until any keypress
         imshow("image", img);
         waitKey(0);
         destroyAllWindows();
     }
 
-    //Initialize the sub-image
+    //Initialize the sending buffers as communication_arrays for MPI
     send_counts = new int[p]; 
     send_index = new int[p]; 
 
@@ -96,7 +99,9 @@ int main(int argc, char* argv[])
                 // img_blurring(img);
                 break;
             case 6:
-                img_grayscale(p, id, send_counts , send_index, img);
+                //Initialize the previous image to be the input image
+                prev_img=img; 
+                img=img_grayscale_mpi(p, id, send_counts , send_index, img);
                 break;
             case 7:
                 stop=false;
@@ -118,6 +123,8 @@ int main(int argc, char* argv[])
         // imwrite( "gray_image.jpg", img );
     }
     
+    delete[] send_counts;
+    delete[] send_index;
     MPI_Finalize();
     return 0;
 
