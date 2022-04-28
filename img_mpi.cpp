@@ -69,24 +69,77 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
     }
 }
 
-int read_selection(const int &id)
-{
-    string input;
-    int selection;
-    if(id==0)
-    {
-        cout<<"please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.exit"<<endl;
-        cin>>input;
-        
-        for(char const &c: input)
-        {
-            if (isdigit(c) == 0) return 0;
-        }
-        selection=stoi(input);
-    }
-    MPI_Bcast( &selection, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    return selection;
-}
+// int get_valid_input_int(const int &id)
+// {
+//     int input;
+//     if(id==0)
+//     {
+//         while(true)
+//         {
+//             //Get input of type T
+//             cin >> input;
+
+//         //Check if the failbit has been set, meaning the beginning of the input
+//         //was not type T. Also make sure the result is the only thing in the input
+//         //stream, otherwise things like 2b would be a valid int
+//             if (cin.fail() || cin.get() != '\n')
+//             {
+//                 //Set the error state flag back to goodbit
+//                 cin.clear();
+
+//                 //Clear the input stream using and empty while loop
+//                 while (cin.get() != '\n');
+
+//                 cout<<"Invalid input, not an integer"<<endl;
+//                 continue;
+//             }
+//             break;
+//         }
+//     }
+//     //Send the result until receive the validate input 
+// 	MPI_Bcast( &input, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//     return input;
+// }
+
+// double get_valid_input_double(const int &id)
+// {
+//     // int selection;
+//     // if(id==0)
+//     // {
+//     //     selection=get_valid_input<int>();
+//     // }
+    
+//     // MPI_Bcast( &selection, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//     // return selection;
+//     double input;
+//     if(id==0)
+//     {
+//         while(true)
+//         {
+//             //Get input of type T
+//             cin >> input;
+
+//         //Check if the failbit has been set, meaning the beginning of the input
+//         //was not type T. Also make sure the result is the only thing in the input
+//         //stream, otherwise things like 2b would be a valid int
+//             if (cin.fail() || cin.get() != '\n')
+//             {
+//                 //Set the error state flag back to goodbit
+//                 cin.clear();
+
+//                 //Clear the input stream using and empty while loop
+//                 while (cin.get() != '\n');
+
+//                 cout<<"Invalid input, not a floating number"<<endl;
+//                 continue;
+//             }
+//             break;
+//         }
+//     }
+//     //Send the result until receive the validate input 
+// 	MPI_Bcast( &input, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+//     return input;
+// }
 
 void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
@@ -105,7 +158,40 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     // imshow("image", sub_img);
     // waitKey(0);
     // destroyAllWindows();
+    sub_img=img_grayscale(sub_img);
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     return;
 }
+
+// void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+// {
+//     printf("img_zooming is working\n");
+
+//     int img_row_num; //Store the number of the input image's row
+//     int img_col_num; //Store the number of the input image's col
+//     int img_ch_num; //Store the number of the input image's channel
+// 	Mat sub_img; //Store the distributed sub-image
+
+//     double row_ratio;
+//     double col_ration;
+
+//     // if(id==0)
+//     // {
+//     //     cout<<"please select the ratio of row zooming"<<endl;
+//     // }
+    
+
+// 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+//     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+	
+// 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+//     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+//     // imshow("image", sub_img);
+//     // waitKey(0);
+//     // destroyAllWindows();
+//     sub_img=img_grayscale(sub_img);
+//     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+//     return;
+// }

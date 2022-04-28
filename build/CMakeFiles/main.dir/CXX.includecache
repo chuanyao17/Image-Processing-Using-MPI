@@ -23,8 +23,12 @@ typeinfo
 -
 
 /home/chuanyao17/image-processing-using-mpi/img_mpi.h
+iostream
+-
 opencv2/opencv.hpp
 /home/chuanyao17/image-processing-using-mpi/opencv2/opencv.hpp
+mpi.h
+/home/chuanyao17/image-processing-using-mpi/mpi.h
 
 /home/chuanyao17/image-processing-using-mpi/img_processing.cpp
 iostream

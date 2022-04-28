@@ -7,9 +7,101 @@
 
 using namespace std;
 using namespace cv;
+
+template <typename T>
+// T getValidatedInput()
+// {
+//     // Get input of type T
+//     T result;
+//     cin >> result;
+
+//     // Check if the failbit has been set, meaning the beginning of the input
+//     // was not type T. Also make sure the result is the only thing in the input
+//     // stream, otherwise things like 2b would be a valid int.
+    
+// 	if (cin.fail() || cin.get() != '\n')
+//     {
+//         // Set the error state flag back to goodbit. If you need to get the input
+//         // again (e.g. this is in a while loop), this is essential. Otherwise, the
+//         // failbit will stay set.
+        
+// 		cin.clear();
+
+//         // Clear the input stream using and empty while loop.
+//         while (cin.get() != '\n');
+
+//         // Throw an exception. Allows the caller to handle it any way you see fit
+//         // (exit, ask for input again, etc.)
+//         // throw "Invalid input";
+// 		cout<<"Invalid input"<<endl;
+//     }
+
+//     return result;
+// }
+
+T getValidatedInput()
+{
+    
+    T result;
+	while(true)
+	{
+		// Get input of type T
+		cin >> result;
+
+    // Check if the failbit has been set, meaning the beginning of the input
+    // was not type T. Also make sure the result is the only thing in the input
+    // stream, otherwise things like 2b would be a valid int.
+    
+		if (cin.fail() || cin.get() != '\n')
+		{
+			// Set the error state flag back to goodbit. If you need to get the input
+			// again (e.g. this is in a while loop), this is essential. Otherwise, the
+			// failbit will stay set.
+			
+			cin.clear();
+
+			// Clear the input stream using and empty while loop.
+			while (cin.get() != '\n');
+
+			// Throw an exception. Allows the caller to handle it any way you see fit
+			// (exit, ask for input again, etc.)
+			// throw "Invalid input";
+			cout<<"Invalid input"<<endl;
+			continue;
+		}
+		break;
+	}
+    
+
+    return result;
+}
  
 int main()
 {
+	int input;
+
+    // while (true)
+    // {
+    //     cout << "Enter an integer: ";
+
+    //     try
+    //     {
+    //         input = getValidatedInput<double>();
+    //     }
+    //     catch (const char* error)
+    //     {
+    //         cerr << error << endl;
+    //         continue;
+    //     }
+
+    //     break;
+    // }
+
+    cout << "Enter an integer: ";
+	input = getValidatedInput<int>();
+	cout << "You entered: " << input << endl;
+	
+	
 	// 设置窗口
 	// Mat img = Mat::zeros(Size(5, 500), CV_8UC3);
 	Mat img(210, 100, CV_8UC3,Scalar(100,100,100));

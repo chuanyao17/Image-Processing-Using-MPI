@@ -71,7 +71,13 @@ int main(int argc, char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
     while (stop)
     {
-        selection=read_selection(id);
+        if(id==0)
+        {
+            cout<<"please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.exit"<<endl;
+        }
+        selection=get_valid_input<int>(id);
+        // double test=get_valid_input<double>(id);
+        // cout<<test<<" id= "<< id<<endl;
         // cout<<selection<<" id= "<< id<<endl;
         switch (selection)
         {
@@ -100,7 +106,7 @@ int main(int argc, char* argv[])
             default:
                 if(id==0)
                 {
-                    cout<<"again!"<<endl;
+                    cout<<"please type from 1 to 7!"<<endl;
                 }
                 break;
         }
