@@ -9,7 +9,7 @@
 using namespace cv;
 using namespace std;
 
-Vec3b bilinear_interpolation(const Mat &img, double &i, double &j)
+Vec3b bilinear_interpolation(const Mat &img, const double &i, const double &j)
 {
 	double a=i-floor(i); //weighted i
 	double b=j-floor(j); //weighted j
@@ -17,7 +17,7 @@ Vec3b bilinear_interpolation(const Mat &img, double &i, double &j)
 	return (1-a)*(1-b)*img.at<cv::Vec3b>(floor(i), floor(j))+a*(1-b)*img.at<cv::Vec3b>(floor(i)+1, floor(j))+a*b*img.at<cv::Vec3b>(floor(i)+1, floor(j)+1)+(1-a)*(b)*img.at<cv::Vec3b>(floor(i), floor(j)+1);
 }
 
-void img_zooming(const Mat &src, double kx, double ky)
+Mat img_zooming(const Mat &src, const double kx, const double ky)
 {
     printf("img_zooming is working\n");
     int  row = src.rows * kx;
@@ -35,9 +35,9 @@ void img_zooming(const Mat &src, double kx, double ky)
 		}
 	}
 	// cv::imwrite("../zoomed.jpg", dst);
-    cv::imshow( "image", dst );
-    cv::waitKey(0);
-    return; 
+    // cv::imshow( "image", dst );
+    // cv::waitKey(0);
+    return dst; 
 }
 int img_rotation()
 {

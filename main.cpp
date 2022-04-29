@@ -82,7 +82,8 @@ int main(int argc, char* argv[])
         switch (selection)
         {
             case 1:
-                // img_zooming(img,8,8);
+                prev_img=img; 
+                img_zooming_mpi(p, id, send_counts , send_index, img);
                 break;
             case 2:
                 break;

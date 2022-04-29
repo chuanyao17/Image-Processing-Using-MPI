@@ -164,34 +164,51 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     return;
 }
 
-// void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
-// {
-//     printf("img_zooming is working\n");
+void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+{
+    printf("img_zooming is working\n");
 
-//     int img_row_num; //Store the number of the input image's row
-//     int img_col_num; //Store the number of the input image's col
-//     int img_ch_num; //Store the number of the input image's channel
-// 	Mat sub_img; //Store the distributed sub-image
+    int img_row_num; //Store the number of the input image's row
+    int img_col_num; //Store the number of the input image's col
+    int img_ch_num; //Store the number of the input image's channel
+	Mat sub_img; //Store the distributed sub-image
 
-//     double row_ratio;
-//     double col_ration;
+    double row_ratio; //Store the input as the zooming ratio of the row axis
+    double col_ratio; //Store the input as the zooming ratio of the col axis
 
-//     // if(id==0)
-//     // {
-//     //     cout<<"please select the ratio of row zooming"<<endl;
-//     // }
-    
+    if(id==0)
+    {
+        cout<<"please input a number as the zooming ratio of the row axis"<<endl;
+    }
+    row_ratio=get_valid_input<double>(id);
+    if(id==0)
+    {
+        cout<<"please input a number as the zooming ratio of the col axis"<<endl;
+    }
+    col_ratio=get_valid_input<double>(id);
 
-// 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
-//     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    // cout<<"row_ratio= "<<row_ratio<<" col_ratio= "<<col_ratio<<" id= "<<id<<endl;
+
+	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 	
-// 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
-//     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
-//     // imshow("image", sub_img);
-//     // waitKey(0);
-//     // destroyAllWindows();
-//     sub_img=img_grayscale(sub_img);
-//     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+    // imshow("image", sub_img);
+    // waitKey(0);
+    // destroyAllWindows();
+    sub_img=img_zooming(sub_img, row_ratio, col_ratio);
+    
+    // Reset the input image to the right size 
+    img_row_num=img_row_num*row_ratio;
+    img_col_num=img_col_num*col_ratio;
+    if (id==0)
+    {
+        img = cv::Mat( img_row_num, img_col_num, img.type());
+    }
+    
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    MPI_Gatherv(sub_img.data, sub_img.total()*sub_img.channels(), MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
-//     return;
-// }
+    return;
+}
