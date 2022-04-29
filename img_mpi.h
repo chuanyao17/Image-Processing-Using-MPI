@@ -19,7 +19,7 @@ void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &);
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
 
 
-//Send the input of the stram from the ROOT to other processes
+//Send the input of the input stream from the ROOT to other processes
 template <typename T>
 T get_valid_input(const int &id)
 {
@@ -36,7 +36,7 @@ T get_valid_input(const int &id)
     }
     else
     {
-        cout<<"only accept int or double using this template!"<<endl;
+        cerr<<"only accept int or double using this template!"<<endl;
         assert(mpi_type != MPI_DATATYPE_NULL);
         return 0;
     }
@@ -44,15 +44,13 @@ T get_valid_input(const int &id)
     {
         while(true)
         {
-            //Get input of type T
+            //Get input with type T
             cin >> input;
 
-        //Check if the failbit has been set, meaning the beginning of the input
-        //was not type T. Also make sure the result is the only thing in the input
-        //stream, otherwise things like 2b would be a valid int
+        //Check if the input is type T or not, and also the input should be the only thing in the input stream, otherwise things like 2b would be a valid
             if (cin.fail() || cin.get() != '\n')
             {
-                //Set the error state flag back to goodbit
+                //Reset the error state flag back to goodbit
                 cin.clear();
 
                 //Clear the input stream using and empty while loop
@@ -64,7 +62,7 @@ T get_valid_input(const int &id)
             break;
         }
     }
-    //Send the result until receive the validate input 
+    
 	MPI_Bcast( &input, 1, mpi_type, 0, MPI_COMM_WORLD);
     return input;
 }

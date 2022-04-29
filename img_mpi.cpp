@@ -173,21 +173,21 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     int img_ch_num; //Store the number of the input image's channel
 	Mat sub_img; //Store the distributed sub-image
 
-    double row_ratio; //Store the input as the zooming ratio of the row axis
-    double col_ratio; //Store the input as the zooming ratio of the col axis
+    double height_ratio; //Store the input as the zooming ratio of the row axis
+    double width_ratio; //Store the input as the zooming ratio of the col axis
 
     if(id==0)
     {
         cout<<"please input a number as the zooming ratio of the row axis"<<endl;
     }
-    row_ratio=get_valid_input<double>(id);
+    height_ratio=get_valid_input<double>(id);
     if(id==0)
     {
         cout<<"please input a number as the zooming ratio of the col axis"<<endl;
     }
-    col_ratio=get_valid_input<double>(id);
+    width_ratio=get_valid_input<double>(id);
 
-    // cout<<"row_ratio= "<<row_ratio<<" col_ratio= "<<col_ratio<<" id= "<<id<<endl;
+    // cout<<"height_ratio= "<<height_ratio<<" width_ratio= "<<width_ratio<<" id= "<<id<<endl;
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
@@ -197,17 +197,22 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     // imshow("image", sub_img);
     // waitKey(0);
     // destroyAllWindows();
-    sub_img=img_zooming(sub_img, row_ratio, col_ratio);
+    sub_img=img_zooming(sub_img, height_ratio, width_ratio);
     
     // Reset the input image to the right size 
-    img_row_num=img_row_num*row_ratio;
-    img_col_num=img_col_num*col_ratio;
+    img_row_num=img_row_num*height_ratio;
+    img_col_num=img_col_num*width_ratio;
+
+    cout<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" id= "<<id<<endl;
+    
     if (id==0)
     {
         img = cv::Mat( img_row_num, img_col_num, img.type());
     }
-    
+
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    print_send_buffers(id, p, send_counts , send_index);
+
     MPI_Gatherv(sub_img.data, sub_img.total()*sub_img.channels(), MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     return;
