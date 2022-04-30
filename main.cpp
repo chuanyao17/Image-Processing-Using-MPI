@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     {
         if(id==0)
         {
-            cout<<"please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.exit"<<endl;
+            cout<<"please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.img_saving 8.exit"<<endl;
         }
         selection=get_valid_input<int>(id);
         // char test=get_valid_input<char>(id);
@@ -102,6 +102,9 @@ int main(int argc, char* argv[])
                 img_grayscale_mpi(p, id, send_counts , send_index, img);
                 break;
             case 7:
+                img_saving(id, img);
+                break;
+            case 8:
                 stop=false;
                 break;
             default:

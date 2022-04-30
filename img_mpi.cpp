@@ -7,6 +7,9 @@
 
 #include <typeinfo>
 
+#define img_minimum_len 1
+#define img_maximum_len 4000
+
 using namespace cv;
 using namespace std;
 
@@ -151,7 +154,10 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
 
 void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
-    printf("img_grayscale is working\n");
+    if(id==0)
+    {
+        printf("img_grayscale is working\n");
+    }
 
     int img_row_num; //Store the number of the input image's row
     int img_col_num; //Store the number of the input image's col
@@ -188,21 +194,40 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     double height_ratio; //Store the input as the zooming ratio of the row axis
     double width_ratio; //Store the input as the zooming ratio of the col axis
 
+    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+
     if(id==0)
     {
-        cout<<"please input a number as the zooming ratio of the row axis"<<endl;
+        cout<<"please input a number between "<<((double)p/img_row_num)<<" to "<<(img_maximum_len/img_row_num)<<" as the zooming ratio of the row axis"<<endl;
     }
     height_ratio=get_valid_input<double>(id);
+    if(height_ratio<((double)p/img_row_num) || (height_ratio*img_row_num)>img_maximum_len)
+    {
+        if(id==0)
+        {
+            cout<<"Invalid height ratio"<<endl;
+        }
+        return;
+    }
+
     if(id==0)
     {
-        cout<<"please input a number as the zooming ratio of the col axis"<<endl;
+        cout<<"please input a number between "<<((double)img_minimum_len/img_col_num)<<" to "<<(img_maximum_len/img_col_num)<<" as the zooming ratio of the col axis"<<endl;
     }
     width_ratio=get_valid_input<double>(id);
-
+    if(width_ratio<((double)img_minimum_len/img_col_num) || width_ratio>(img_maximum_len/img_col_num))
+    {
+        if(id==0)
+        {
+            cout<<"Invalid width ratio"<<endl;
+        }
+        return;
+    }
     // cout<<"height_ratio= "<<height_ratio<<" width_ratio= "<<width_ratio<<" id= "<<id<<endl;
 
-	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
-    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+	
+
 
 	
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
@@ -230,5 +255,14 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
+    return;
+}
+
+void img_saving(const int &id, const Mat &img)
+{
+    if(id==0)
+    {
+        imwrite("output_image.jpg", img);
+    }
     return;
 }

@@ -17,7 +17,7 @@ void print_send_buffers(const int &, const int &, int * , int *); //check *send_
 // double get_valid_input_double(const int &); //Send the input (DOUBLE) from the ROOT to other processes
 void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &); 
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
-
+void img_saving(const int &, const Mat &);
 
 //Send the input of the input stream from the ROOT to other processes
 template <typename T>
