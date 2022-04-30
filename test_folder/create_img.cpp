@@ -81,22 +81,25 @@ void bilinear_interpolation(const int &dst_i, const int &dst_j, const int &heigh
 
 int main()
 {
-	int input;
+	
+	
+	
+	
+	
+	// Test bilinear_interpolation
+	// int dstH=4;
+	// int dstW=4;
+	// int srcH=2;
+	// int srcW=2;
+	// for(int i=0;i<dstH;i++)
+	// {
+	// 	for(int j=0;j<dstW;j++)
+	// 	{
+	// 		bilinear_interpolation(i, j, 2, 2, srcH, srcW);
+	// 	}
+	// }
 
-	int dstH=4;
-	int dstW=4;
-
-	int srcH=2;
-	int srcW=2;
-
-	for(int i=0;i<dstH;i++)
-	{
-		for(int j=0;j<dstW;j++)
-		{
-			bilinear_interpolation(i, j, 2, 2, srcH, srcW);
-		}
-	}
-
+	// int input;
     // while (true)
     // {
     //     cout << "Enter an integer: ";
