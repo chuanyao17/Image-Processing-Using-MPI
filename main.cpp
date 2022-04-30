@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
         // imwrite( "gray_image.jpg", img );
     }
     
-    delete[] send_counts;
-    delete[] send_index;
+    // delete[] send_counts;
+    // delete[] send_index;
     MPI_Finalize();
     return 0;
 

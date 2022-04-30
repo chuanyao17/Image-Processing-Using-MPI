@@ -9,36 +9,6 @@ using namespace std;
 using namespace cv;
 
 template <typename T>
-// T getValidatedInput()
-// {
-//     // Get input of type T
-//     T result;
-//     cin >> result;
-
-//     // Check if the failbit has been set, meaning the beginning of the input
-//     // was not type T. Also make sure the result is the only thing in the input
-//     // stream, otherwise things like 2b would be a valid int.
-    
-// 	if (cin.fail() || cin.get() != '\n')
-//     {
-//         // Set the error state flag back to goodbit. If you need to get the input
-//         // again (e.g. this is in a while loop), this is essential. Otherwise, the
-//         // failbit will stay set.
-        
-// 		cin.clear();
-
-//         // Clear the input stream using and empty while loop.
-//         while (cin.get() != '\n');
-
-//         // Throw an exception. Allows the caller to handle it any way you see fit
-//         // (exit, ask for input again, etc.)
-//         // throw "Invalid input";
-// 		cout<<"Invalid input"<<endl;
-//     }
-
-//     return result;
-// }
-
 T getValidatedInput()
 {
     
@@ -75,10 +45,57 @@ T getValidatedInput()
 
     return result;
 }
- 
+
+void bilinear_interpolation(const int &dst_i, const int &dst_j, const int &height_ratio, const int &width_ratio, const int &row, const int &col)
+{
+	double src_i; //Store the coordinate i of the source image 
+	double src_j; //Store the coordinate j of the source image 
+	double a; //Store the weighted src_i
+	double b; //Store the weighted src_j
+
+	
+	int i; //Store the coordinate of src_i_floor and make sure it is between 0 to the number of rows -1 
+	int j; //Store the coordinate of src_j_floor and make sure it is between 0 to the number of cols -1 
+	int i_plus; //Store the coordinate of src_i_floor+1 and make sure it is between 0 to the number of rows -1  
+	int j_plus; //Store the coordinate of src_j_floor+1 and make sure it is between 0 to the number of cols -1  
+	
+	src_i=(dst_i+0.5)/height_ratio-0.5; //Align the geometric center of the src image and dst image and get the src_i backwards
+	src_j=(dst_j+0.5)/width_ratio-0.5; //Align the geometric center of the src image and dst image and get the src_j backwards
+
+	int src_i_floor=floor(src_i);
+	int src_j_floor=floor(src_j);
+	
+	a=src_i-src_i_floor; 
+	b=src_j-src_j_floor; 
+
+	i=min(max(0,src_i_floor),row-1);
+	j=min(max(0,src_j_floor),col-1);
+	i_plus=min(max(0,src_i_floor+1),row-1);
+	j_plus=min(max(0,src_j_floor+1),col-1);
+
+	cout<<"( "<<dst_i<<","<<dst_j<<" ) "<<" src_i= "<<src_i<<" src_j= "<<src_j<<" a= "<<a<<" b= "<<b<<"( "<<i<<","<<j<<" ) "<<"( "<<i_plus<<","<<j<<" ) "<<"( "<<i_plus<<","<<j_plus<<" ) "<<"( "<<i<<","<<j_plus<<" ) "<<endl;
+
+	// return (1-a)*(1-b)*img.at<Vec3b>(i, j)+a*(1-b)*img.at<Vec3b>(i_plus, j)+a*b*img.at<Vec3b>(i_plus, j_plus)+(1-a)*(b)*img.at<Vec3b>(i, j_plus);
+}
+
+
 int main()
 {
 	int input;
+
+	int dstH=4;
+	int dstW=4;
+
+	int srcH=2;
+	int srcW=2;
+
+	for(int i=0;i<dstH;i++)
+	{
+		for(int j=0;j<dstW;j++)
+		{
+			bilinear_interpolation(i, j, 2, 2, srcH, srcW);
+		}
+	}
 
     // while (true)
     // {
@@ -97,9 +114,9 @@ int main()
     //     break;
     // }
 
-    cout << "Enter an integer: ";
-	input = getValidatedInput<int>();
-	cout << "You entered: " << input << endl;
+    // cout << "Enter an integer: ";
+	// input = getValidatedInput<int>();
+	// cout << "You entered: " << input << endl;
 	
 	
 	// 设置窗口
@@ -131,10 +148,12 @@ int main()
 		}
 	}
 	
-	int b=3;
-	double c=2;
-	double a=b/c;
-	cout<<a<<endl;
+	int test=2;
+
+	double a=3;
+
+	cout<<test/a<<endl;
+
 
 	// std::cout <<"Origin img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 
 	// imshow("board", img);

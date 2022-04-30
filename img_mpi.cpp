@@ -10,11 +10,19 @@
 using namespace cv;
 using namespace std;
 
-void update_communication_arrays (const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
+void update_communication_arrays(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
 {
     for(int i = 0; i < p; i++) {
         send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p))*img_col_num*img_ch_num; //The number of elements is assigned rows * image's cols * image's channels
         send_index[i] = (((i*img_row_num)/p))*img_col_num*img_ch_num;
+    }
+}
+
+void update_send_index(const int &p, int *send_counts , int *send_index)
+{
+    for(int i=1;i<p;i++)
+    {
+        send_index[i]=send_index[i-1]+send_counts[i-1]; //Update send_index by send_counts
     }
 }
 
@@ -166,7 +174,11 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
 
 void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
-    printf("img_zooming is working\n");
+    if(id==0)
+    {
+        printf("img_zooming is working\n");
+    }
+    
 
     int img_row_num; //Store the number of the input image's row
     int img_col_num; //Store the number of the input image's col
@@ -191,8 +203,11 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+
+    print_send_buffers(id, p, send_counts , send_index);
 	
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+    cout<<"*******"<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" sub_row_num= "<<sub_img.rows<<" sub_col_num= "<<sub_img.cols<<" total= "<<sub_img.rows*sub_img.cols*sub_img.channels()<<" id= "<<id<<endl;
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
     // imshow("image", sub_img);
     // waitKey(0);
@@ -203,17 +218,26 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     img_row_num=img_row_num*height_ratio;
     img_col_num=img_col_num*width_ratio;
 
-    cout<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" id= "<<id<<endl;
+    cout<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" sub_row_num= "<<sub_img.rows<<" sub_col_num= "<<sub_img.cols<<" total= "<<sub_img.rows*sub_img.cols*sub_img.channels()<<" id= "<<id<<endl;
     
     if (id==0)
     {
         img = cv::Mat( img_row_num, img_col_num, img.type());
     }
 
-    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-    print_send_buffers(id, p, send_counts , send_index);
+    // update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
+    // printf("send_counts[%d]=%d, id=%d\n",id,send_counts[id],id);
+    // MPI_Bcast( &send_counts[id], 1, MPI_INT, id, MPI_COMM_WORLD );
+    MPI_Allgather(&send_counts[id], 1, MPI_INT, &send_counts[id], 1, MPI_INT,MPI_COMM_WORLD);
 
-    MPI_Gatherv(sub_img.data, sub_img.total()*sub_img.channels(), MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    update_send_index(p, send_counts , send_index);
+    
+    // MPI_Barrier(MPI_COMM_WORLD);
+    print_send_buffers(id, p, send_counts , send_index);
+    
+
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     return;
 }

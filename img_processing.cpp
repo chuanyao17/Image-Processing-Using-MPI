@@ -9,57 +9,79 @@
 using namespace cv;
 using namespace std;
 
-Vec3b bilinear_interpolation(const Mat &img, const double &i, const double &j)
+Vec3b bilinear_interpolation(const Mat &img, const int &dst_i, const int &dst_j, const double &height_ratio, const double &width_ratio)
 {
-	double a=i-floor(i); //weighted i
-	double b=j-floor(j); //weighted j
+	double src_i; //Store the coordinate i of the source image 
+	double src_j; //Store the coordinate j of the source image 
+	double a; //Store the weighted src_i
+	double b; //Store the weighted src_j
 
-	return (1-a)*(1-b)*img.at<cv::Vec3b>(floor(i), floor(j))+a*(1-b)*img.at<cv::Vec3b>(floor(i)+1, floor(j))+a*b*img.at<cv::Vec3b>(floor(i)+1, floor(j)+1)+(1-a)*(b)*img.at<cv::Vec3b>(floor(i), floor(j)+1);
+	
+	int i; //Store the coordinate of src_i_floor and make sure it is between 0 to the number of rows -1 
+	int j; //Store the coordinate of src_j_floor and make sure it is between 0 to the number of cols -1 
+	int i_plus; //Store the coordinate of src_i_floor+1 and make sure it is between 0 to the number of rows -1  
+	int j_plus; //Store the coordinate of src_j_floor+1 and make sure it is between 0 to the number of cols -1  
+	
+	src_i=(dst_i+0.5)/height_ratio-0.5; //Align the geometric center of the src image and dst image and get the src_i backwards
+	src_j=(dst_j+0.5)/width_ratio-0.5; //Align the geometric center of the src image and dst image and get the src_j backwards
+
+	int src_i_floor=floor(src_i);
+	int src_j_floor=floor(src_j);
+	
+	a=src_i-src_i_floor; 
+	b=src_j-src_j_floor; 
+
+	i=min(max(0,src_i_floor),img.rows-1);
+	j=min(max(0,src_j_floor),img.cols-1);
+	i_plus=min(max(0,src_i_floor+1),img.rows-1);
+	j_plus=min(max(0,src_j_floor+1),img.cols-1);
+
+	// cout<<"( "<<dst_i<<","<<dst_j<<" ) "<<" src_i= "<<src_i<<" src_j= "<<src_j<<" a= "<<a<<" b= "<<b<<"( "<<i<<","<<j<<" ) "<<"( "<<i_plus<<","<<j<<" ) "<<"( "<<i_plus<<","<<j_plus<<" ) "<<"( "<<i<<","<<j_plus<<" ) "<<endl;
+
+	return (1-a)*(1-b)*img.at<Vec3b>(i, j)+a*(1-b)*img.at<Vec3b>(i_plus, j)+a*b*img.at<Vec3b>(i_plus, j_plus)+(1-a)*(b)*img.at<Vec3b>(i, j_plus);
 }
 
-Mat img_zooming(const Mat &src, const double kx, const double ky)
+Mat img_zooming(const Mat &img, const double &height_ratio, const double &width_ratio)
 {
-    printf("img_zooming is working\n");
-    int  row = src.rows * kx;
-	int  col = src.cols * ky;
+    
+    int  row = img.rows * height_ratio;
+	int  col = img.cols * width_ratio;
 
-	cv::Mat dst(row, col, src.type());
+	Mat output_img(row, col, img.type());
 	
     for (int i = 0; i < row; i++)
 	{
-		double srx = i / kx;
 		for (int j = 0; j < col; j++)
 		{
-			double sry = j /ky;
-			dst.at<cv::Vec3b>(i, j) = bilinear_interpolation(src, srx, sry);
+			output_img.at<Vec3b>(i, j) = bilinear_interpolation(img, i, j, height_ratio, width_ratio);
 		}
 	}
 	// cv::imwrite("../zoomed.jpg", dst);
-    // cv::imshow( "image", dst );
+    // cv::imshow( "image", output_img );
     // cv::waitKey(0);
-    return dst; 
+    return output_img; 
 }
 int img_rotation()
 {
     printf("img_rotation is working\n");
     return 1;
 } 
-void img_brightness(Mat &src, float alpha, float beta)
+void img_brightness(Mat &img, float alpha, float beta)
 {
     printf("img_brightness is working\n");
-	Mat dst = src.clone();
-	for(int row =0 ; row < src.rows ; row++){
-        for(int col = 0 ; col < src.cols ; col++){
+	Mat dst = img.clone();
+	for(int row =0 ; row < img.rows ; row++){
+        for(int col = 0 ; col < img.cols ; col++){
             //如果输入图像为三通道 RGB
-            if(src.channels() == 3){
+            if(img.channels() == 3){
                 //对每个通道上的数据做计算
-                dst.at<Vec3b>(row,col)[0] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[0]*alpha + beta);
-                dst.at<Vec3b>(row,col)[1] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[1]*alpha + beta);
-                dst.at<Vec3b>(row,col)[2] = saturate_cast<uchar>(src.at<Vec3b>(row,col)[2]*alpha + beta);
+                dst.at<Vec3b>(row,col)[0] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[0]*alpha + beta);
+                dst.at<Vec3b>(row,col)[1] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[1]*alpha + beta);
+                dst.at<Vec3b>(row,col)[2] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[2]*alpha + beta);
                 //如果输入图像为单通道 灰度
-            }else if(src.channels() == 1){
+            }else if(img.channels() == 1){
                 //对单一通道做计算
-                dst.at<uchar>(row,col) = saturate_cast<uchar>(src.at<uchar>(row,col)*alpha + beta);
+                dst.at<uchar>(row,col) = saturate_cast<uchar>(img.at<uchar>(row,col)*alpha + beta);
             }
         }
         
@@ -69,19 +91,19 @@ void img_brightness(Mat &src, float alpha, float beta)
 	destroyAllWindows();
     return;
 }
-void img_contrast(Mat &src, float percent)
+void img_contrast(Mat &img, float percent)
 {
     printf("img_contrast is working\n");
 	float alpha = percent / 100.f;
 	alpha = max(-1.f, min(1.f, alpha));
-	Mat temp = src.clone();
-	int row = src.rows;
-	int col = src.cols;
+	Mat temp = img.clone();
+	int row = img.rows;
+	int col = img.cols;
 	int thresh = 127;
 	for (int i = 0; i < row; ++i)
 	{
 		uchar *t = temp.ptr<uchar>(i);
-		uchar *s = src.ptr<uchar>(i);
+		uchar *s = img.ptr<uchar>(i);
 		for (int j = 0; j < col; ++j)
 		{
 			uchar b = s[3 * j];
@@ -121,27 +143,27 @@ void img_contrast(Mat &src, float percent)
     destroyAllWindows();
 	return;
 }
-void img_blurring(Mat &src)
+void img_blurring(Mat &img)
 {
     printf("img_blurring is working\n");
 	
-    int h = src.rows;
-	int w = src.cols;
+    int h = img.rows;
+	int w = img.cols;
  
 	// 代码实现：3x3 均值模糊
-	Mat dst = src.clone();
+	Mat dst = img.clone();
 	for (int row = 1; row < h - 1; row++) {
 		for (int col = 1; col < w - 1; col++) {
 			// 卷积过程中取周围的 3x3 个像素（包括自身）
-			Vec3b p1 = src.at<Vec3b>(row - 1, col - 1);
-			Vec3b p2 = src.at<Vec3b>(row - 1, col);
-			Vec3b p3 = src.at<Vec3b>(row - 1, col + 1);
-			Vec3b p4 = src.at<Vec3b>(row, col - 1);
-			Vec3b p5 = src.at<Vec3b>(row, col);
-			Vec3b p6 = src.at<Vec3b>(row, col + 1);
-			Vec3b p7 = src.at<Vec3b>(row + 1, col - 1);
-			Vec3b p8 = src.at<Vec3b>(row + 1, col);
-			Vec3b p9 = src.at<Vec3b>(row + 1, col + 1);
+			Vec3b p1 = img.at<Vec3b>(row - 1, col - 1);
+			Vec3b p2 = img.at<Vec3b>(row - 1, col);
+			Vec3b p3 = img.at<Vec3b>(row - 1, col + 1);
+			Vec3b p4 = img.at<Vec3b>(row, col - 1);
+			Vec3b p5 = img.at<Vec3b>(row, col);
+			Vec3b p6 = img.at<Vec3b>(row, col + 1);
+			Vec3b p7 = img.at<Vec3b>(row + 1, col - 1);
+			Vec3b p8 = img.at<Vec3b>(row + 1, col);
+			Vec3b p9 = img.at<Vec3b>(row + 1, col + 1);
  
 			// 分通道取值相加
 			int b = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
@@ -158,7 +180,7 @@ void img_blurring(Mat &src)
  
 	// 直接调用 OpenCV API: 3x3 均值模糊
 	// Mat dst_opencv;
-	// blur(src, dst_opencv, Size(3, 3), Point(-1, -1), BORDER_DEFAULT);
+	// blur(img, dst_opencv, Size(3, 3), Point(-1, -1), BORDER_DEFAULT);
 	// imshow("3--blur(OpenCV API)", dst_opencv);
  
 	waitKey(0);
@@ -193,13 +215,13 @@ Mat img_grayscale(const Mat &img)
 	}
 
 
-    // Mat temp = src.clone();
-	// int row = src.rows;
-	// int col = src.cols;
+    // Mat temp = img.clone();
+	// int row = img.rows;
+	// int col = img.cols;
 	// for (int i = 0; i < row; ++i)
 	// {
 	// 	uchar *t = temp.ptr<uchar>(i);
-	// 	uchar *s = src.ptr<uchar>(i);
+	// 	uchar *s = img.ptr<uchar>(i);
 	// 	for (int j = 0; j < col; ++j)
 	// 	{
 	// 		uchar b = s[3 * j];
