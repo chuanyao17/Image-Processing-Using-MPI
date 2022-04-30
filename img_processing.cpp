@@ -61,10 +61,32 @@ Mat img_zooming(const Mat &img, const double &height_ratio, const double &width_
     // cv::waitKey(0);
     return output_img; 
 }
-int img_rotation()
+Mat img_rotation(const Mat &img, const int& id, const int &row, const int &col, const bool clock_wise)
 {
-    printf("img_rotation is working\n");
-    return 1;
+    cout<<"id= "<<id<<endl;
+	Mat output_img=Mat(row,col,img.type()); //Initialize the output image
+	
+	int src_i; //Store the coordinate i of the source image 
+	int src_j; //Store the coordinate j of the source image 
+	int r=1; //counterclock wise
+
+	if(clock_wise) 
+	{
+		r=-1; //clock wise
+	}
+	
+	for(int i=0;i<row;i++)
+	{
+		for(int j=0;j<col;j++)
+		{
+			
+			src_i= j*r;
+			src_j= -(i-row+id)*r;
+			// printf("(%d,%d), (%d,%d), id= %d\n",i,j,src_i,src_j, id);
+			output_img.at<Vec3b>(i,j)= img.at<Vec3b>(src_i,src_j);
+		}
+	}
+    return output_img;
 } 
 void img_brightness(Mat &img, float alpha, float beta)
 {
@@ -285,4 +307,14 @@ Mat img_grayscale(const Mat &img)
 	// waitKey(0);
     // destroyAllWindows();
 	return output_img;
+}
+
+void img_saving(const int &id, const Mat &img)
+{
+    if(id==0)
+    {
+        printf("img_saving is working\n");
+		imwrite("output_image.jpg", img);
+    }
+    return;
 }

@@ -83,8 +83,8 @@ int main()
 {
 	
 	
-	
-	
+	Mat test_img(3,2,16);
+	imwrite("3x2.jpg",test_img);
 	
 	// Test bilinear_interpolation
 	// int dstH=4;

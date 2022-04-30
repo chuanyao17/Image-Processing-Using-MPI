@@ -86,6 +86,8 @@ int main(int argc, char* argv[])
                 img_zooming_mpi(p, id, send_counts , send_index, img);
                 break;
             case 2:
+                prev_img=img; 
+                img_rotation_mpi(p, id, send_counts , send_index, img);
                 break;
             case 3:
                 // img_brightness(img,1.5,10);

@@ -29,7 +29,7 @@ void update_send_index(const int &p, int *send_counts , int *send_index)
     }
 }
 
-Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int *send_counts , const int *send_index, const uchar *img_data)
+Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
 {   
     
     
@@ -38,7 +38,7 @@ Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_n
     int recv_counts=send_counts[id]; //Store the size of the sub image's data
     // uchar *sub_img_buffer=new uchar[recv_counts]; 
     
-    Mat sub_img(recv_counts/(img_col_num*img_ch_num),img_col_num,CV_8UC3); //Construct the sub image with (assigned rows, image's col number, 3 channels)
+    Mat sub_img(recv_counts/(img_col_num*img_ch_num),img_col_num, img_type); //Construct the sub image with (assigned rows, image's col number, 3 channels)
     
     //Assign the sublist from process 0 to each process
     MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
@@ -48,17 +48,31 @@ Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_n
     return sub_img;
 }
 
-void update_image_properties(const int &id, const Mat &img, int &img_row_num, int &img_col_num, int &img_ch_num)
+Mat distribute_image_full(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const Mat &img)
+{   
+    
+    Mat sub_img=Mat( img_row_num, img_col_num, img_type);
+    if(id==0)
+    {
+        sub_img=img.clone();
+    }
+    MPI_Bcast(sub_img.data, img_row_num*img_col_num*img_ch_num, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD );
+    return sub_img;
+}
+
+void update_image_properties(const int &id, const Mat &img, int &img_row_num, int &img_col_num, int &img_ch_num, int &img_type)
 {
     if(id==0)
     {
         img_row_num=img.rows;
         img_col_num=img.cols;
         img_ch_num=img.channels();
+        img_type=img.type();
     }
     MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     MPI_Bcast( &img_ch_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
+    MPI_Bcast( &img_type, 1, MPI_INT, 0, MPI_COMM_WORLD );
 }
 
 void print_send_buffers(const int &id, const int &p, int *send_counts , int *send_index)
@@ -162,12 +176,13 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     int img_row_num; //Store the number of the input image's row
     int img_col_num; //Store the number of the input image's col
     int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
 
-	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 	
-	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
     // imshow("image", sub_img);
     // waitKey(0);
@@ -189,12 +204,13 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     int img_row_num; //Store the number of the input image's row
     int img_col_num; //Store the number of the input image's col
     int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
 
     double height_ratio; //Store the input as the zooming ratio of the row axis
     double width_ratio; //Store the input as the zooming ratio of the col axis
 
-    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num);
+    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 
     if(id==0)
@@ -230,7 +246,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
 
 
 	
-	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
     // cout<<"*******"<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" sub_row_num= "<<sub_img.rows<<" sub_col_num= "<<sub_img.cols<<" total= "<<sub_img.rows*sub_img.cols*sub_img.channels()<<" id= "<<id<<endl;
     
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
@@ -250,7 +266,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     // cout<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" sub_row_num= "<<sub_img.rows<<" sub_col_num= "<<sub_img.cols<<" total= "<<sub_img.rows*sub_img.cols*sub_img.channels()<<" id= "<<id<<endl;
     if (id==0)
     {
-        img = cv::Mat( img_row_num, img_col_num, img.type());
+        img = Mat( img_row_num, img_col_num, img.type());
     }
     
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
@@ -258,11 +274,58 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     return;
 }
 
-void img_saving(const int &id, const Mat &img)
+void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
     if(id==0)
     {
-        imwrite("output_image.jpg", img);
+        printf("img_rotation\n");
     }
+
+    int img_row_num; //Store the number of the input image's row
+    int img_col_num; //Store the number of the input image's col
+    int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
+    bool clock_wise=false;
+    int dir_selection;
+    
+	Mat sub_img; //Store the distributed sub-image
+
+    if(id==0)
+    {
+        cout<<"Type 1 to rotate the image 90 degrees clockwise, else counter clock wise"<<endl;
+    }
+    dir_selection=get_valid_input<int>(id);
+    if(dir_selection==1)
+    {
+        clock_wise=true;
+    }
+
+	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
+    
+    update_communication_arrays (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
+	
+    sub_img=distribute_image_full(id, img_row_num, img_col_num, img_ch_num, img_type, img);
+	// sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, send_counts, send_index, img.data);
+    
+    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+    
+    // destroyAllWindows();
+    // cout<<"sub_row= "<<send_counts[id]/(img_row_num*img_ch_num)<<" sub_col= "<<img_row_num<<" clock_wise= "<<clock_wise<<" id "<<id <<endl;
+    sub_img=img_rotation(sub_img, id, send_counts[id]/(img_row_num*img_ch_num), img_row_num, clock_wise);
+    if (id==0)
+    {
+        img = Mat( img_col_num, img_row_num, img.type());
+    }
+    
+    string tmp;
+    tmp+=to_string(id);
+
+    // imshow(tmp, sub_img);
+    // waitKey(0);
+    // cout<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" sub_row_num= "<<sub_img.rows<<" sub_col_num= "<<sub_img.cols<<" total= "<<sub_img.rows*sub_img.cols*sub_img.channels()<<" id= "<<id<<endl;
+    // print_send_buffers(id, p, send_counts , send_index);
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
     return;
 }
+
