@@ -101,7 +101,8 @@ int main(int argc, char* argv[])
                 // img_contrast(img,50.f);
                 break;
             case 5:
-                // img_blurring(img);
+                prev_img=img; 
+                img_blurring_mpi(p, id, send_counts , send_index, img);
                 break;
             case 6:
                 //Initialize the previous image to be the input image

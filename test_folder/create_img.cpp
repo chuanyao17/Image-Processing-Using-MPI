@@ -8,6 +8,14 @@
 using namespace std;
 using namespace cv;
 
+#define para_1 1
+#define para_2 2
+
+int add_define(const int &a, const int &b)
+{
+	return a+b;
+}
+
 template <typename T>
 T getValidatedInput()
 {
@@ -114,11 +122,14 @@ int main()
 	
 	// imwrite("3x6.jpg",test_img);
 	
-	int a=3;
-	int b=5;
-	double c;
-	c=(a/b);
-	cout<<c<<endl;
+	// int a=3;
+	// int b=5;
+	// double c;
+	// c=(a/b);
+	// cout<<c<<endl;
+
+	// int res=add_define(para_1,para_2);
+	// cout<<res<<endl;
 
 	// Test bilinear_interpolation
 	// int dstH=4;
@@ -184,6 +195,20 @@ int main()
 			img.at<cv::Vec3b>(i, j)=img.at<cv::Vec3b>(i, j)+img.at<cv::Vec3b>(i, j);
 		}
 	}
+	imshow("board",img);
+	waitKey(0);
+	
+	Vec3b color;
+	color=(120,120,120);
+	
+	for (int i=0; i<img.rows;i++)
+	{
+		for(int j=0; j<img.cols;j++)
+		{
+			img.at<cv::Vec3b>(i, j)=color;
+		}
+	}
+	
 	
 	
 
