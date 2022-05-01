@@ -82,39 +82,44 @@ void bilinear_interpolation(const int &dst_i, const int &dst_j, const int &heigh
 int main()
 {
 	
-	int test_row=3;
-	int test_col=6;
+	// int test_row=3;
+	// int test_col=6;
 	
-	Mat test_img(test_row,test_col,16);
-	for(int i=0;i<test_row;i++)
-	{
-		for(int j=0;j<test_col;j++)
-		{
-			if(i<test_row/3)
-			{
-				test_img.at<Vec3b>(i,j)[0]=0;
-				test_img.at<Vec3b>(i,j)[1]=0;
-				test_img.at<Vec3b>(i,j)[2]=0;
-			}
-			else if(i<test_row/3*2)
-			{
-				test_img.at<Vec3b>(i,j)[0]=100;
-				test_img.at<Vec3b>(i,j)[1]=100;
-				test_img.at<Vec3b>(i,j)[2]=100;
-			}
-			else
-			{
-				test_img.at<Vec3b>(i,j)[0]=255;
-				test_img.at<Vec3b>(i,j)[1]=255;
-				test_img.at<Vec3b>(i,j)[2]=255;
-			}
+	// Mat test_img(test_row,test_col,16);
+	// for(int i=0;i<test_row;i++)
+	// {
+	// 	for(int j=0;j<test_col;j++)
+	// 	{
+	// 		if(i<test_row/3)
+	// 		{
+	// 			test_img.at<Vec3b>(i,j)[0]=0;
+	// 			test_img.at<Vec3b>(i,j)[1]=0;
+	// 			test_img.at<Vec3b>(i,j)[2]=0;
+	// 		}
+	// 		else if(i<test_row/3*2)
+	// 		{
+	// 			test_img.at<Vec3b>(i,j)[0]=100;
+	// 			test_img.at<Vec3b>(i,j)[1]=100;
+	// 			test_img.at<Vec3b>(i,j)[2]=100;
+	// 		}
+	// 		else
+	// 		{
+	// 			test_img.at<Vec3b>(i,j)[0]=255;
+	// 			test_img.at<Vec3b>(i,j)[1]=255;
+	// 			test_img.at<Vec3b>(i,j)[2]=255;
+	// 		}
 			
-		}
-	}
+	// 	}
+	// }
 	
-	imwrite("3x6.jpg",test_img);
+	// imwrite("3x6.jpg",test_img);
 	
-	
+	int a=3;
+	int b=5;
+	double c;
+	c=(a/b);
+	cout<<c<<endl;
+
 	// Test bilinear_interpolation
 	// int dstH=4;
 	// int dstW=4;
@@ -180,11 +185,7 @@ int main()
 		}
 	}
 	
-	int test=2;
-
-	double a=3;
-
-	cout<<test/a<<endl;
+	
 
 
 	// std::cout <<"Origin img "<< "img_size " << img.size() << "img_type " << img.type() << std::endl; 

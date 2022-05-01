@@ -5,6 +5,8 @@
 #include "img_processing.h"
 #include "img_mpi.h"
 
+#define min 1
+#define max 8
 
 using namespace cv;
 using namespace std;
@@ -22,6 +24,9 @@ int main(int argc, char* argv[])
 
     int *send_counts; //Store the size of the assgined sub-image of each process
     int *send_index; //Store the start index of the assgined sub-image of each process
+
+    int min_selection=min;
+    int max_selection=max;
     
     MPI_Status status;
     MPI_Init(&argc, &argv);
@@ -67,7 +72,7 @@ int main(int argc, char* argv[])
     // img_grayscale(p, id, send_counts , send_index, img);
     
     // img_zooming(img,0.5,2);
-
+   
     MPI_Barrier(MPI_COMM_WORLD);
     while (stop)
     {
@@ -75,7 +80,7 @@ int main(int argc, char* argv[])
         {
             cout<<"please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.img_saving 8.exit"<<endl;
         }
-        selection=get_valid_input<int>(id);
+        selection=get_valid_input<int>(id, min_selection, max_selection);
         // char test=get_valid_input<char>(id);
         // cout<<test<<" id= "<< id<<endl;
         // cout<<selection<<" id= "<< id<<endl;
@@ -112,7 +117,7 @@ int main(int argc, char* argv[])
             default:
                 if(id==0)
                 {
-                    cout<<"please type from 1 to 7!"<<endl;
+                    cout<<"please type from 1 to 8!"<<endl;
                 }
                 break;
         }

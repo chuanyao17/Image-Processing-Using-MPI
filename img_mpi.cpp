@@ -94,78 +94,6 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
     }
 }
 
-// int get_valid_input_int(const int &id)
-// {
-//     int input;
-//     if(id==0)
-//     {
-//         while(true)
-//         {
-//             //Get input of type T
-//             cin >> input;
-
-//         //Check if the failbit has been set, meaning the beginning of the input
-//         //was not type T. Also make sure the result is the only thing in the input
-//         //stream, otherwise things like 2b would be a valid int
-//             if (cin.fail() || cin.get() != '\n')
-//             {
-//                 //Set the error state flag back to goodbit
-//                 cin.clear();
-
-//                 //Clear the input stream using and empty while loop
-//                 while (cin.get() != '\n');
-
-//                 cout<<"Invalid input, not an integer"<<endl;
-//                 continue;
-//             }
-//             break;
-//         }
-//     }
-//     //Send the result until receive the validate input 
-// 	MPI_Bcast( &input, 1, MPI_INT, 0, MPI_COMM_WORLD);
-//     return input;
-// }
-
-// double get_valid_input_double(const int &id)
-// {
-//     // int selection;
-//     // if(id==0)
-//     // {
-//     //     selection=get_valid_input<int>();
-//     // }
-    
-//     // MPI_Bcast( &selection, 1, MPI_INT, 0, MPI_COMM_WORLD);
-//     // return selection;
-//     double input;
-//     if(id==0)
-//     {
-//         while(true)
-//         {
-//             //Get input of type T
-//             cin >> input;
-
-//         //Check if the failbit has been set, meaning the beginning of the input
-//         //was not type T. Also make sure the result is the only thing in the input
-//         //stream, otherwise things like 2b would be a valid int
-//             if (cin.fail() || cin.get() != '\n')
-//             {
-//                 //Set the error state flag back to goodbit
-//                 cin.clear();
-
-//                 //Clear the input stream using and empty while loop
-//                 while (cin.get() != '\n');
-
-//                 cout<<"Invalid input, not a floating number"<<endl;
-//                 continue;
-//             }
-//             break;
-//         }
-//     }
-//     //Send the result until receive the validate input 
-// 	MPI_Bcast( &input, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-//     return input;
-// }
-
 void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
     if(id==0)
@@ -178,6 +106,8 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     int img_ch_num; //Store the number of the input image's channel
     int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
+
+    
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
@@ -209,37 +139,49 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
 
     double height_ratio; //Store the input as the zooming ratio of the row axis
     double width_ratio; //Store the input as the zooming ratio of the col axis
+    double min_height_ratio, max_height_ratio;
+    double min_width_ratio, max_width_ratio;
 
     update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 
+    min_height_ratio=(double)p/img_row_num;
+    max_height_ratio=img_maximum_len/img_row_num;
+    min_width_ratio=(double)img_minimum_len/img_col_num;
+    max_width_ratio=img_maximum_len/img_col_num;
+    
     if(id==0)
     {
-        cout<<"please input a number between "<<((double)p/img_row_num)<<" to "<<(img_maximum_len/img_row_num)<<" as the zooming ratio of the row axis"<<endl;
+        cout<<"please input a number between "<<min_height_ratio<<" to "<<max_height_ratio<<" as the zooming ratio of the row axis"<<endl;
     }
-    height_ratio=get_valid_input<double>(id);
-    if(height_ratio<((double)p/img_row_num) || (height_ratio*img_row_num)>img_maximum_len)
-    {
-        if(id==0)
-        {
-            cout<<"Invalid height ratio"<<endl;
-        }
-        return;
-    }
+    
+    height_ratio=get_valid_input<double>(id, min_height_ratio, max_height_ratio);
+
+    // if(height_ratio<((double)p/img_row_num) || height_ratio>(img_maximum_len/img_row_num))
+    // {
+    //     if(id==0)
+    //     {
+    //         cout<<"Invalid height ratio"<<endl;
+    //     }
+    //     return;
+    // }
 
     if(id==0)
     {
-        cout<<"please input a number between "<<((double)img_minimum_len/img_col_num)<<" to "<<(img_maximum_len/img_col_num)<<" as the zooming ratio of the col axis"<<endl;
+        cout<<"please input a number between "<<min_width_ratio<<" to "<<max_width_ratio<<" as the zooming ratio of the col axis"<<endl;
     }
-    width_ratio=get_valid_input<double>(id);
-    if(width_ratio<((double)img_minimum_len/img_col_num) || width_ratio>(img_maximum_len/img_col_num))
-    {
-        if(id==0)
-        {
-            cout<<"Invalid width ratio"<<endl;
-        }
-        return;
-    }
+    
+    
+    width_ratio=get_valid_input<double>(id, min_width_ratio, max_width_ratio );
+    
+    // if(width_ratio< ((double)img_minimum_len/img_col_num)|| width_ratio>(img_maximum_len/img_col_num))
+    // {
+    //     if(id==0)
+    //     {
+    //         cout<<"Invalid width ratio"<<endl;
+    //     }
+    //     return;
+    // }
     // cout<<"height_ratio= "<<height_ratio<<" width_ratio= "<<width_ratio<<" id= "<<id<<endl;
 
 	
@@ -287,16 +229,18 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
     int img_type; //Store the input image's type
     bool clock_wise=false;
     int dir_selection;
+    int clockwise=1;
+    int counter_clockwise=2;
     // int prev_row; //Store the number of the previous sub image's row
     
 	Mat sub_img; //Store the distributed sub-image
 
     if(id==0)
     {
-        cout<<"Type 1 to rotate the image 90 degrees clockwise, else counter clock wise"<<endl;
+        cout<<"please select direction: 1. clockwise 2. counter-clockwise"<<endl;
     }
-    dir_selection=get_valid_input<int>(id);
-    if(dir_selection==1)
+    dir_selection=get_valid_input<int>(id,clockwise,counter_clockwise);
+    if(dir_selection==clockwise)
     {
         clock_wise=true;
     }

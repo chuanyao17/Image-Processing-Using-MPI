@@ -22,7 +22,7 @@ void img_rotation_mpi(const int &, const int &, int *, int *, Mat &);
 
 //Send the input of the input stream from the ROOT to other processes
 template <typename T>
-T get_valid_input(const int &id)
+T get_valid_input(const int &id, T &min, T &max)
 {
     T input;
     MPI_Datatype mpi_type = MPI_DATATYPE_NULL;
@@ -47,9 +47,10 @@ T get_valid_input(const int &id)
         {
             //Get input with type T
             cin >> input;
+            // cout<<" min= "<<min<<" "<<(input<min)<<" max= "<<max<<endl;
 
         //Check if the input is type T or not, and also the input should be the only thing in the input stream, otherwise things like 2b would be a valid
-            if (cin.fail() || cin.get() != '\n')
+            if ((input<min) || (input>max) || cin.fail() || cin.get() != '\n')
             {
                 //Reset the error state flag back to goodbit
                 cin.clear();
@@ -60,6 +61,7 @@ T get_valid_input(const int &id)
                 cout<<"Invalid input"<<endl;
                 continue;
             }
+            //  cout<<"!!!!!!!!!!!!!!!"<<" min= "<<min<<" "<<(input<min)<<" max= "<<max<<endl;
             break;
         }
     }
