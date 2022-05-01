@@ -61,28 +61,34 @@ Mat img_zooming(const Mat &img, const double &height_ratio, const double &width_
     // cv::waitKey(0);
     return output_img; 
 }
-Mat img_rotation(const Mat &img, const int& id, const int &row, const int &col, const bool clock_wise)
+Mat img_rotation(const Mat &img, const int &row, const int &col, const int &prev_row, const bool clock_wise)
 {
-    cout<<"id= "<<id<<endl;
+    
 	Mat output_img=Mat(row,col,img.type()); //Initialize the output image
 	
 	int src_i; //Store the coordinate i of the source image 
 	int src_j; //Store the coordinate j of the source image 
 	int r=1; //counterclock wise
+	int row_offset;
+
+	row_offset=img.cols-1-prev_row;
+	// cout<<" col= "<<img.cols<<" offset= "<<row_offset<<" id= "<<id<<endl;
 
 	if(clock_wise) 
 	{
 		r=-1; //clock wise
 	}
 	
+	// cout<<"row= "<<row<<" col= "<<col<<endl;
+
 	for(int i=0;i<row;i++)
 	{
 		for(int j=0;j<col;j++)
 		{
 			
-			src_i= j*r;
-			src_j= -(i-row+id)*r;
-			// printf("(%d,%d), (%d,%d), id= %d\n",i,j,src_i,src_j, id);
+			src_i= j;
+			src_j= -(i-row_offset);
+			// printf("(%d,%d), (%d,%d), (%d,%d), id= %d\n",i,j,src_i,src_j, (i-row_offset), j, id);	
 			output_img.at<Vec3b>(i,j)= img.at<Vec3b>(src_i,src_j);
 		}
 	}

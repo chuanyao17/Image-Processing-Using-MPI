@@ -287,6 +287,7 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
     int img_type; //Store the input image's type
     bool clock_wise=false;
     int dir_selection;
+    // int prev_row; //Store the number of the previous sub image's row
     
 	Mat sub_img; //Store the distributed sub-image
 
@@ -311,14 +312,25 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
     
     // destroyAllWindows();
     // cout<<"sub_row= "<<send_counts[id]/(img_row_num*img_ch_num)<<" sub_col= "<<img_row_num<<" clock_wise= "<<clock_wise<<" id "<<id <<endl;
-    sub_img=img_rotation(sub_img, id, send_counts[id]/(img_row_num*img_ch_num), img_row_num, clock_wise);
+    
+    // if(id==0)
+    // {
+    //     prev_row=0;
+    // }
+    // else
+    // {
+    //     prev_row=send_counts[id-1]/(img_row_num*img_ch_num);
+    // }
+    // print_send_buffers(id, p, send_counts , send_index);
+   
+    sub_img=img_rotation(sub_img, send_counts[id]/(img_row_num*img_ch_num), img_row_num, send_index[id]/(img_row_num*img_ch_num), clock_wise);
     if (id==0)
     {
         img = Mat( img_col_num, img_row_num, img.type());
     }
     
-    string tmp;
-    tmp+=to_string(id);
+    // string tmp;
+    // tmp+=to_string(id);
 
     // imshow(tmp, sub_img);
     // waitKey(0);

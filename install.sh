@@ -10,4 +10,5 @@ cp ../100x300_image.jpg .
 cp ../100x210_image.jpg .
 cp ../test.jpg .
 cp ../3x2.jpg .
+cp ../3x6.jpg .
 

@@ -82,9 +82,38 @@ void bilinear_interpolation(const int &dst_i, const int &dst_j, const int &heigh
 int main()
 {
 	
+	int test_row=3;
+	int test_col=6;
 	
-	Mat test_img(3,2,16);
-	imwrite("3x2.jpg",test_img);
+	Mat test_img(test_row,test_col,16);
+	for(int i=0;i<test_row;i++)
+	{
+		for(int j=0;j<test_col;j++)
+		{
+			if(i<test_row/3)
+			{
+				test_img.at<Vec3b>(i,j)[0]=0;
+				test_img.at<Vec3b>(i,j)[1]=0;
+				test_img.at<Vec3b>(i,j)[2]=0;
+			}
+			else if(i<test_row/3*2)
+			{
+				test_img.at<Vec3b>(i,j)[0]=100;
+				test_img.at<Vec3b>(i,j)[1]=100;
+				test_img.at<Vec3b>(i,j)[2]=100;
+			}
+			else
+			{
+				test_img.at<Vec3b>(i,j)[0]=255;
+				test_img.at<Vec3b>(i,j)[1]=255;
+				test_img.at<Vec3b>(i,j)[2]=255;
+			}
+			
+		}
+	}
+	
+	imwrite("3x6.jpg",test_img);
+	
 	
 	// Test bilinear_interpolation
 	// int dstH=4;
