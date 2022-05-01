@@ -49,7 +49,7 @@ T get_valid_input(const int &id, T &min, T &max)
             cin >> input;
             // cout<<" min= "<<min<<" "<<(input<min)<<" max= "<<max<<endl;
 
-        //Check if the input is type T or not, and also the input should be the only thing in the input stream, otherwise things like 2b would be a valid
+        //Check if the input is type T, between the right range, and also the input should be the only thing in the input stream, otherwise things like 2b would be a valid
             if ((input<min) || (input>max) || cin.fail() || cin.get() != '\n')
             {
                 //Reset the error state flag back to goodbit
