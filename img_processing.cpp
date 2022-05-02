@@ -48,6 +48,10 @@ Mat img_zooming(const Mat &img, const double &height_ratio, const double &width_
 	int  col = img.cols * width_ratio;
 
 	Mat output_img(row, col, img.type());
+	if(row==0)
+	{
+		return output_img;
+	}
 	
     for (int i = 0; i < row; i++)
 	{
@@ -65,6 +69,10 @@ Mat img_rotation(const Mat &img, const int &row, const int &col, const int &prev
 {
     
 	Mat output_img=Mat(row,col,img.type()); //Initialize the output image
+	if(img.rows==0)
+	{
+		return output_img;
+	}
 	
 	int src_i; //Store the coordinate i of the source image 
 	int src_j; //Store the coordinate j of the source image 
@@ -188,7 +196,11 @@ void img_contrast(Mat &img, float percent)
 }
 Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 {
-    Mat output_img; 
+    Mat output_img=Mat(img.size(), img.type()); //Initialize the output image
+	if(img.rows==0)
+	{
+		return output_img;
+	}
 	int gaussian_kernel[9]={1,2,1,2,4,2,1,2,1}; //Need to divided by 16 for all elements when calculating
 	Vec3b img_window[9]; //Convolve the image by 3*3 window size with gaussian kernel
 	Vec3b color; //Store the result of the convolution
@@ -206,8 +218,9 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 	// 	row+=border;
 	// }
 
+
 	output_img=Mat(row-(border*2),col-(border*2), img.type());//Initialize the output image
-	cout<<"out_row= "<<output_img.rows<<" out_col= "<<output_img.cols<<" id= "<<id<<endl;
+	// cout<<"out_row= "<<output_img.rows<<" out_col= "<<output_img.cols<<" id= "<<id<<endl;
 
 	for(int i=border;i<row-border;i++)
 	{
@@ -291,8 +304,12 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 }
 
 Mat img_grayscale(const Mat &img)
-{
-    Mat output_img=Mat(img.size(), img.type()); //Initialize the output image
+{	
+	Mat output_img=Mat(img.size(), img.type()); //Initialize the output image
+	if(img.rows==0)
+	{
+		return output_img;
+	}
 	int row=img.rows;
 	int col=img.cols;
 	uchar gray;

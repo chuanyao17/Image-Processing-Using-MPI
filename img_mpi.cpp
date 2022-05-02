@@ -16,31 +16,6 @@
 using namespace cv;
 using namespace std;
 
-void update_communication_arrays(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
-{
-    cout<<"total row= "<<img_row_num<<endl;
-    for(int i = 0; i < p; i++) {
-        send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p))*img_col_num*img_ch_num; //The number of elements is assigned rows * image's cols * image's channels
-        send_index[i] = (((i*img_row_num)/p))*img_col_num*img_ch_num;
-    }
-}
-
-void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
-{
-    cout<<"total row= "<<img_row_num<<"~~~~~~border"<<endl;
-    for(int i = 0; i < p; i++) {
-        send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p)+(border*2))*img_col_num*img_ch_num; //The number of elements is (assigned rows+border*2) * image's cols * image's channels
-        send_index[i] = (((i*img_row_num)/p)-border)*img_col_num*img_ch_num; //Move index to the previous(upper) row based on the border width    
-    }
-    //Remove one side of the border from the ROOT and the last processor
-    send_counts[0]-=(border*img_col_num*img_ch_num);   
-    send_counts[p-1]-=(border*img_col_num*img_ch_num);
-
-    //Reset the index of ROOT to 0
-    send_index[0]+=(border*img_col_num*img_ch_num);
-    
-}   
-
 void update_send_index(const int &p, int *send_counts , int *send_index)
 {
     for(int i=1;i<p;i++)
@@ -48,6 +23,105 @@ void update_send_index(const int &p, int *send_counts , int *send_index)
         send_index[i]=send_index[i-1]+send_counts[i-1]; //Update send_index by send_counts
     }
 }
+
+void update_communication_arrays(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
+{
+    // cout<<"total row= "<<img_row_num<<endl;
+    int sub_row_num;
+    int elements_num=img_col_num*img_ch_num;
+    for(int i = 0; i < p; i++) {
+        sub_row_num=((((i+1)*img_row_num)/p)-((i*img_row_num)/p));
+        
+        // send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p))*img_col_num*img_ch_num; //The number of elements is assigned sub-rows * image's cols * image's channels
+        // send_index[i] = (((i*img_row_num)/p))*img_col_num*img_ch_num;
+        send_counts[i] = sub_row_num*elements_num; //The number of elements is sub-rows * image's cols * image's channels
+        send_index[i] = (((i*img_row_num)/p))*elements_num;
+        
+        // cout<<" check= "<<sub_row_num*img_col_num*img_ch_num<<endl;
+    }
+    
+}
+
+void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
+{
+    // cout<<"total row= "<<img_row_num<<"~~~~~~border"<<endl;
+
+    int sub_row_num;
+    int elements_num=img_col_num*img_ch_num;
+    // for(int i = 0; i < p; i++) {
+    //     sub_row_num=((((i+1)*img_row_num)/p)-((i*img_row_num)/p));
+    //     if(sub_row_num==0)
+    //     {
+    //         continue;
+    //     }
+    //     send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p)+(border*2))*elements_num; //The number of elements is (assigned sub-rows+border*2) * image's cols * image's channels
+    // }
+    
+    int first;
+    int last;
+    bool first_non_zeron_found=false;
+    bool last_non_zero_found=false;
+    for(int i=0;i<p;i++)
+    {
+        //Move index to the previous(upper) row based on the border width except the first processor which contain non-zero assigned sub-rows
+        // printf("**************************** send_counts[%d]=%d ****************************\n",i,send_counts[i]);
+        if(send_index[i]!=0)
+        {
+            send_index[i]-=(elements_num*border);
+            
+        }
+
+        //Add back the additional border elements to all the processor which contain non-zero assigned sub-rows
+        
+        if(send_counts[i]!=0)
+        {
+            send_counts[i]+=(elements_num*border*2);
+            
+           
+            // if(!first_non_zeron_found)
+            // {
+            //     first_non_zeron_found=true;
+            //     first=i;
+            //     cout<<"first= "<<first<<endl;
+            // }
+            
+        }
+        
+        // if(send_counts[i]!=0 && !first_non_zeron_found)
+        // {
+        //     first_non_zeron_found=true;
+        //     first=i;
+        //     send_counts[first]+=(elements_num*border);
+        // }
+        // if(send_counts[p-i-1]!=0 && !last_non_zero_found)
+        // {
+        //     cout<<" last found "<<(p-i-1) <<" current i is "<<i<<endl;
+        //     last_non_zero_found=true;
+        //     last=p-i-1;
+        //     cout<<"last= "<<last<<endl;
+        // }
+        // printf("send_counts[%d]=%d\n",i,send_counts[i]);
+     
+    }
+    //Remove one side of the border from the first and the last processor which contain non-zero assigned sub-rows if they are not in same index
+    // if (first!=last)
+    // {
+    //     send_counts[first]-=(elements_num*border);
+    //     send_counts[last]-=(elements_num*border);
+    // }
+    
+    //Add back the additional border elements if there is only one processor contains non-zero assigned sub-rows
+    // if(first==last)
+    // {
+    //     cout<<"only one!!!!!!!!!!!!!!!!!!!!!"<<endl;
+    //     send_counts[first]+=(elements_num*border*2);
+    // }
+
+    // // update_send_index(p, send_counts , send_index);
+    
+}   
+
+
 
 Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
 {   
@@ -88,7 +162,7 @@ void update_image_properties(const int &id, const Mat &img, int &img_row_num, in
         img_col_num=img.cols;
         img_ch_num=img.channels();
         img_type=img.type();
-        cout<<" img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" img_ch_num= "<<img_ch_num<<endl;
+        // cout<<" img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" img_ch_num= "<<img_ch_num<<endl;
     }
     MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
@@ -328,11 +402,11 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     if(id==0)
     {
         printf("img_blurring is working\n");
-        cout<<"              " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
+        // cout<<"              " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
         copyMakeBorder(img, img, border_width, border_width, border_width, border_width, BORDER_REFLECT_101); //Create a border around the image
         // imshow("image", img);
         // waitKey(0);
-        cout<<" added border " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
+        // cout<<" added border " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
     }
 
     int img_row_num; //Store the number of the input image's row
@@ -347,12 +421,12 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     
     img_row_num-=(border_width*2);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
     
      
 
     update_communication_arrays_border(p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, border_width);
-    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 	// cout<<"*******"<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" id= "<<id<<endl;
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
@@ -360,7 +434,15 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     // waitKey(0);
     // destroyAllWindows();
     sub_img=img_blurring(sub_img, id, p, border_width);
-    // MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+    img_col_num-=(border_width*2);
+    if(id==0)
+    {
+        img = Mat( img_row_num, img_col_num, img.type());
+    }
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     return;
 }
