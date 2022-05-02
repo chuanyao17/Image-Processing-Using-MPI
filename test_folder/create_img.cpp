@@ -205,7 +205,8 @@ int main()
 	{
 		for(int j=0; j<img.cols;j++)
 		{
-			img.at<cv::Vec3b>(i, j)=color;
+			color=img.at<cv::Vec3b>(i, j);
+			img.at<cv::Vec3b>(i, j)=saturate_cast<Vec3b>(color/3);
 		}
 	}
 	

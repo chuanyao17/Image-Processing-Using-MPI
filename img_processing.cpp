@@ -208,58 +208,129 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 	
 	int row=img.rows;
 	int col=img.cols;
-	
-	// if(id==0)
-	// {
-	// 	row+=border;
-	// }
-	// if(id==(p-1))
-	// {
-	// 	row+=border;
-	// }
-
 
 	output_img=Mat(row-(border*2),col-(border*2), img.type());//Initialize the output image
 	// cout<<"out_row= "<<output_img.rows<<" out_col= "<<output_img.cols<<" id= "<<id<<endl;
 
+	uchar b;
+	uchar g;
+	uchar r;
+
 	for(int i=border;i<row-border;i++)
+	// for(int i=border;i<3;i++)
 	{
 		for(int j=border;j<col-border;j++)
+		// for(int j=border;j<3;j++)
 		{
-			// color=(0,0,0);
+			color=(0,0,0);
+			b=(0);
+			g=(0);
+			r=(0);
+			
+			// 卷积过程中取周围的 3x3 个像素（包括自身）
+			Vec3b p1 = img.at<Vec3b>(i - 1, j - 1);
+			Vec3b p2 = img.at<Vec3b>(i - 1, j);
+			Vec3b p3 = img.at<Vec3b>(i- 1, j + 1);
+			Vec3b p4 = img.at<Vec3b>(i, j - 1);
+			Vec3b p5 = img.at<Vec3b>(i, j);
+			Vec3b p6 = img.at<Vec3b>(i, j + 1);
+			Vec3b p7 = img.at<Vec3b>(i + 1, j - 1);
+			Vec3b p8 = img.at<Vec3b>(i + 1, j);
+			Vec3b p9 = img.at<Vec3b>(i+ 1, j + 1);
+ 
+			// 分通道取值相加
+			int b_n = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
+			int g_n = p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1] + p8[1] + p9[1];
+			int r_n = p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2] + p8[2] + p9[2];
+
+			// int b_ = p1[0]*gaussian_kernel[0] + p2[0]*gaussian_kernel[1] + p3[0]*gaussian_kernel[2] + p4[0]*gaussian_kernel[3] + p5[0]*gaussian_kernel[4] + p6[0]*gaussian_kernel[5] + p7[0]*gaussian_kernel[6] + p8[0]*gaussian_kernel[7] + p9[0]*gaussian_kernel[8];
+			// int g_ = p1[1]*gaussian_kernel[0] + p2[1]*gaussian_kernel[1] + p3[1]*gaussian_kernel[2] + p4[1]*gaussian_kernel[3] + p5[1]*gaussian_kernel[4] + p6[1]*gaussian_kernel[5] + p7[1]*gaussian_kernel[6] + p8[1]*gaussian_kernel[7] + p9[1]*gaussian_kernel[8];
+			// int r_ = p1[2]*gaussian_kernel[0] + p2[2]*gaussian_kernel[1] + p3[2]*gaussian_kernel[2] + p4[2]*gaussian_kernel[3] + p5[2]*gaussian_kernel[4] + p6[2]*gaussian_kernel[5] + p7[2]*gaussian_kernel[6] + p8[2]*gaussian_kernel[7] + p9[2]*gaussian_kernel[8];
+
+			// printf("b =%d,%d g=%d,%d r=%d,%d \n",(b/16),saturate_cast<uchar>(b / 16),(g/16),saturate_cast<uchar>(g / 16),(r/16),saturate_cast<uchar>(r / 16));
+			// 分通道求均值
+			// output_img.at<Vec3b>(i-border,j-border)[0] = saturate_cast<uchar>(b / 9);
+			// output_img.at<Vec3b>(i-border,j-border)[1] = saturate_cast<uchar>(g / 9);
+			// output_img.at<Vec3b>(i-border,j-border)[2] = saturate_cast<uchar>(r / 9);
+
+			// output_img.at<Vec3b>(i-border,j-border)[0] = saturate_cast<uchar>(b_ / 16);
+			// output_img.at<Vec3b>(i-border,j-border)[1] = saturate_cast<uchar>(g_ / 16);
+			// output_img.at<Vec3b>(i-border,j-border)[2] = saturate_cast<uchar>(r_ / 16);
+			
+			
+			
+			
+			
+			
+			
 			for(int kernel_i=0;kernel_i<kernel_size;kernel_i++)
 			{
 				for(int kernel_j=0;kernel_j<kernel_size;kernel_j++)
 				{
-					// color+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))
-					// printf("dsr(%d,%d), src(%d,%d), kernel(%d), id=%d\n",i,j,(i+kernel_i-border),(j+kernel_j-border),(kernel_i*kernel_size+kernel_j),id);
+					// color+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))*gaussian_kernel[kernel_i*kernel_size+kernel_j]/16);
+					color+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))/(kernel_size*kernel_size));
+					
+					// b+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[0]);
+					// g+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[1]);
+					// r+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[2]);
+
+					
+					
+					// printf("(%d,%d), src(%d,%d), output(%d,%d), kernel(%d), id=%d\n",i,j,(i+kernel_i-border),(j+kernel_j-border),(i-border),(j-border),(kernel_i*kernel_size+kernel_j),id);
 				}
 			}
-			// output_img.at<Vec3b>(i,j)=color;
 			
 			
-			
-			// Vec3b p1 = img.at<Vec3b>(i-border, j-border);
-			// Vec3b p2 = img.at<Vec3b>(i-border, j);
-			// Vec3b p3 = img.at<Vec3b>(i-border, j+border);
-			// Vec3b p4 = img.at<Vec3b>(i, j-1);
-			// Vec3b p5 = img.at<Vec3b>(row, col);
-			// Vec3b p6 = img.at<Vec3b>(row, col + 1);
-			// Vec3b p7 = img.at<Vec3b>(row + 1, col - 1);
-			// Vec3b p8 = img.at<Vec3b>(row + 1, col);
-			// Vec3b p9 = img.at<Vec3b>(row + 1, col + 1);
+			// cout<<" cout= "<< (int)b << " "<<(int)g<<" "<<(int)r<<endl;
+			// cout<<"color= "<<color <<endl;
+			// printf("b =%d,%d g=%d,%d r=%d,%d \n",b_n/9,b,g_n/9,g,r_n/9,r);
 			
 			
-			// b=img.at<Vec3b>(i,j)[0];
-			// g=img.at<Vec3b>(i,j)[1];
-			// r=img.at<Vec3b>(i,j)[2];
-			
-			
-			// output_img.at<Vec3b>(i,j)[0] = saturate_cast<uchar>(b);
-            // output_img.at<Vec3b>(i,j)[1] = saturate_cast<uchar>(g);
-            // output_img.at<Vec3b>(i,j)[2] = saturate_cast<uchar>(r);
+			output_img.at<Vec3b>(i-border,j-border)=color;
+			// output_img.at<Vec3b>(i-border,j-border)=img.at<Vec3b>(i,j);
+			// output_img.at<Vec3b>(i-border,j-border)[0]=saturate_cast<uchar>(b / 9);
+			// output_img.at<Vec3b>(i-border,j-border)[1]=saturate_cast<uchar>(g / 9);
+			// output_img.at<Vec3b>(i-border,j-border)[2]=saturate_cast<uchar>(r / 9);
 		}
 	}
+
+	// for (int i=border;i<row-border;i++) {
+	// 	for (int j=border;j<col-border;j++) {
+	// 		// 卷积过程中取周围的 3x3 个像素（包括自身）
+	// 		Vec3b p1 = img.at<Vec3b>(i - 1, j - 1);
+	// 		Vec3b p2 = img.at<Vec3b>(i - 1, j);
+	// 		Vec3b p3 = img.at<Vec3b>(i- 1, j + 1);
+	// 		Vec3b p4 = img.at<Vec3b>(i, j - 1);
+	// 		Vec3b p5 = img.at<Vec3b>(i, j);
+	// 		Vec3b p6 = img.at<Vec3b>(i, j + 1);
+	// 		Vec3b p7 = img.at<Vec3b>(i + 1, j - 1);
+	// 		Vec3b p8 = img.at<Vec3b>(i + 1, j);
+	// 		Vec3b p9 = img.at<Vec3b>(i+ 1, j + 1);
+ 
+	// 		// 分通道取值相加
+	// 		// int b = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
+	// 		// int g = p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1] + p8[1] + p9[1];
+	// 		// int r = p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2] + p8[2] + p9[2];
+
+	// 		int b_ = p1[0]*gaussian_kernel[0] + p2[0]*gaussian_kernel[1] + p3[0]*gaussian_kernel[2] + p4[0]*gaussian_kernel[3] + p5[0]*gaussian_kernel[4] + p6[0]*gaussian_kernel[5] + p7[0]*gaussian_kernel[6] + p8[0]*gaussian_kernel[7] + p9[0]*gaussian_kernel[8];
+	// 		int g_ = p1[1]*gaussian_kernel[0] + p2[1]*gaussian_kernel[1] + p3[1]*gaussian_kernel[2] + p4[1]*gaussian_kernel[3] + p5[1]*gaussian_kernel[4] + p6[1]*gaussian_kernel[5] + p7[1]*gaussian_kernel[6] + p8[1]*gaussian_kernel[7] + p9[1]*gaussian_kernel[8];
+	// 		int r_ = p1[2]*gaussian_kernel[0] + p2[2]*gaussian_kernel[1] + p3[2]*gaussian_kernel[2] + p4[2]*gaussian_kernel[3] + p5[2]*gaussian_kernel[4] + p6[2]*gaussian_kernel[5] + p7[2]*gaussian_kernel[6] + p8[2]*gaussian_kernel[7] + p9[2]*gaussian_kernel[8];
+
+	// 		// printf("b =%d,%d g=%d,%d r=%d,%d \n",(b/16),saturate_cast<uchar>(b / 16),(g/16),saturate_cast<uchar>(g / 16),(r/16),saturate_cast<uchar>(r / 16));
+	// 		// 分通道求均值
+	// 		// output_img.at<Vec3b>(i-border,j-border)[0] = saturate_cast<uchar>(b / 9);
+	// 		// output_img.at<Vec3b>(i-border,j-border)[1] = saturate_cast<uchar>(g / 9);
+	// 		// output_img.at<Vec3b>(i-border,j-border)[2] = saturate_cast<uchar>(r / 9);
+
+	// 		output_img.at<Vec3b>(i-border,j-border)[0] = saturate_cast<uchar>(b_ / 16);
+	// 		output_img.at<Vec3b>(i-border,j-border)[1] = saturate_cast<uchar>(g_ / 16);
+	// 		output_img.at<Vec3b>(i-border,j-border)[2] = saturate_cast<uchar>(r_ / 16);
+	// 	}
+	// }
+
+ 
+	
+
 	return output_img;
     // int h = img.rows;
 	// int w = img.cols;
