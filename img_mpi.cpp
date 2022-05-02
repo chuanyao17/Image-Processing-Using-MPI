@@ -18,6 +18,7 @@ using namespace std;
 
 void update_communication_arrays(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
 {
+    cout<<"total row= "<<img_row_num<<endl;
     for(int i = 0; i < p; i++) {
         send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p))*img_col_num*img_ch_num; //The number of elements is assigned rows * image's cols * image's channels
         send_index[i] = (((i*img_row_num)/p))*img_col_num*img_ch_num;
@@ -26,6 +27,7 @@ void update_communication_arrays(const int &p, const int &img_row_num, const int
 
 void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
 {
+    cout<<"total row= "<<img_row_num<<"~~~~~~border"<<endl;
     for(int i = 0; i < p; i++) {
         send_counts[i] = ((((i+1)*img_row_num)/p)-((i*img_row_num)/p)+(border*2))*img_col_num*img_ch_num; //The number of elements is (assigned rows+border*2) * image's cols * image's channels
         send_index[i] = (((i*img_row_num)/p)-border)*img_col_num*img_ch_num; //Move index to the previous(upper) row based on the border width    
@@ -340,10 +342,15 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
 	Mat sub_img; //Store the distributed sub-image
 
     
-
+    
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
+    
+    img_row_num-=(border_width*2);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
     print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+    
+     
+
     update_communication_arrays_border(p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, border_width);
     print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 	// cout<<"*******"<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" id= "<<id<<endl;
