@@ -14,7 +14,7 @@ void update_communication_arrays_border (const int &, const int &, const int &, 
 Mat distribute_image(const int &, const int &, const int &, const int &, const int &, const int *, const int *, const uchar *); //distribute the input image among each processor 
 Mat distribute_image_full(const int &, const int &, const int &, const int &, const int &, const Mat &); //distribute the whole input image to each processor 
 void update_image_properties(const int &, const Mat &, int &, int &, int &, int &); //Send the image properties from the ROOT to other processes
-void print_send_buffers(const int &, const int &, int * , int *); //check *send_counts and * send_index
+void print_send_buffers(const int &, const int &, int * , int *, int &, int &); //check *send_counts and * send_index
 void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &); 
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
 void img_rotation_mpi(const int &, const int &, int *, int *, Mat &);

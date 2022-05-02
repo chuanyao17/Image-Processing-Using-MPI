@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cstdio>
+#include <algorithm> 
 #include "opencv2/opencv.hpp"
 #include "mpi.h"
 #include "img_mpi.h"
 #include "img_processing.h"
+
 
 #include <typeinfo>
 
@@ -84,6 +86,7 @@ void update_image_properties(const int &id, const Mat &img, int &img_row_num, in
         img_col_num=img.cols;
         img_ch_num=img.channels();
         img_type=img.type();
+        cout<<" img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" img_ch_num= "<<img_ch_num<<endl;
     }
     MPI_Bcast( &img_row_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
     MPI_Bcast( &img_col_num, 1, MPI_INT, 0, MPI_COMM_WORLD );
@@ -91,7 +94,7 @@ void update_image_properties(const int &id, const Mat &img, int &img_row_num, in
     MPI_Bcast( &img_type, 1, MPI_INT, 0, MPI_COMM_WORLD );
 }
 
-void print_send_buffers(const int &id, const int &p, int *send_counts , int *send_index)
+void print_send_buffers(const int &id, const int &p, int *send_counts , int *send_index, int &img_col_num, int &img_ch_num)
 {
     if(id==0)
     {
@@ -105,6 +108,12 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
         for(int i=0;i<p;i++)
         {
             cout<<send_index[i]<<" ";
+        }
+        cout<<endl;
+        cout<<"send_row= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_counts[i]/(img_col_num*img_ch_num)<<" ";
         }
         cout<<endl;
     }
@@ -127,7 +136,7 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-	
+	// print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
     // imshow("image", sub_img);
@@ -160,11 +169,20 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
 
     update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-
-    min_height_ratio=(double)p/img_row_num;
-    max_height_ratio=img_maximum_len/img_row_num;
-    min_width_ratio=(double)img_minimum_len/img_col_num;
-    max_width_ratio=img_maximum_len/img_col_num;
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+    min_height_ratio=min(((double)p/img_row_num),1.0);
+    max_height_ratio=(double)img_maximum_len/img_row_num;
+    if(img_row_num>img_maximum_len)
+    {
+        max_height_ratio=1.0;
+    }
+    min_width_ratio=min(((double)img_minimum_len/img_col_num),1.0);
+    max_width_ratio=(double)img_maximum_len/img_col_num;
+    if(img_col_num>img_maximum_len)
+    {
+        max_width_ratio=1.0;
+    }
+    
     
     if(id==0)
     {
@@ -172,6 +190,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     }
     
     height_ratio=get_valid_input<double>(id, min_height_ratio, max_height_ratio);
+    
 
     // if(height_ratio<((double)p/img_row_num) || height_ratio>(img_maximum_len/img_row_num))
     // {
@@ -217,7 +236,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
     MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
     update_send_index(p, send_counts , send_index);
-    
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
      // Reset the input image to the right size 
     MPI_Allreduce(&sub_img.rows, &img_row_num, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     img_col_num=img_col_num*width_ratio;
@@ -307,11 +326,11 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     if(id==0)
     {
         printf("img_blurring is working\n");
-        cout << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
+        cout<<"              " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
         copyMakeBorder(img, img, border_width, border_width, border_width, border_width, BORDER_REFLECT_101); //Create a border around the image
         // imshow("image", img);
         // waitKey(0);
-        cout << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
+        cout<<" added border " << "size " << img.size()<< " row " << img.rows<< " col " << img.cols   << " img_type " << img.type() <<" id "<<id <<endl;
     }
 
     int img_row_num; //Store the number of the input image's row
@@ -323,10 +342,10 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     
 
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
-    // update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-    // print_send_buffers(id, p, send_counts , send_index);
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
     update_communication_arrays_border(p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, border_width);
-    print_send_buffers(id, p, send_counts , send_index);
+    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 	// cout<<"*******"<<"img_row_num= "<<img_row_num<<" img_col_num= "<<img_col_num<<" id= "<<id<<endl;
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
     // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
