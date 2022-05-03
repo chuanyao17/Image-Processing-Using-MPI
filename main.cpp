@@ -56,9 +56,11 @@ int main(int argc, char* argv[])
         }
         cout<<"program starts:  "<<endl;
 
+        prev_img=img;
         
 
         //Display the window infinitely until any keypress
+        cout<<"**** Display the window infinitely until any keypress ****"<<endl;
         imshow("image", img);
         waitKey(0);
         destroyAllWindows();
@@ -78,7 +80,10 @@ int main(int argc, char* argv[])
     {
         if(id==0)
         {
-            cout<<"Please select: 1.img_zooming 2.img_rotation 3.img_brightness 4.img_contrast 5.img_blurring 6.img_grayscale 7.img_saving 8.exit"<<endl;
+            // cout<<"Please select: 1.Image Zooming 2.Image Rotation 3.Image Contrast & Brightness 4.Image Blurring 5.Image Grayscale"<<endl
+            // <<"               6.Image Saving  7.Back to only one previous step               8.Exit"<<endl;
+            cout<<"Please select:"<<endl<<" 1.Image Zooming"<<endl<<" 2.Image Rotation"<<endl<<" 3.Image Contrast & Brightness"<<endl<<" 4.Image Blurring"<<endl<<" 5.Image Grayscale"
+            <<endl<<" 6.Image Saving"<<endl<<" 7.Back to only one previous step"<<endl<<" 8.Exit"<<endl;
         }
         selection=get_valid_input<int>(id, min_selection, max_selection);
         // char test=get_valid_input<char>(id);
@@ -95,22 +100,22 @@ int main(int argc, char* argv[])
                 img_rotation_mpi(p, id, send_counts , send_index, img);
                 break;
             case 3:
-                // img_brightness(img,1.5,10);
+                prev_img=img; 
+                img_contrast_brightness_mpi(p, id, send_counts , send_index, img);
                 break;
             case 4:
-                // img_contrast(img,50.f);
-                break;
-            case 5:
                 prev_img=img; 
                 img_blurring_mpi(p, id, send_counts , send_index, img);
                 break;
-            case 6:
-                //Initialize the previous image to be the input image
+            case 5:
                 prev_img=img; 
                 img_grayscale_mpi(p, id, send_counts , send_index, img);
                 break;
-            case 7:
+            case 6:
                 img_saving(id, img);
+                break;
+            case 7:
+                img=prev_img;
                 break;
             case 8:
                 stop=false;
@@ -122,14 +127,18 @@ int main(int argc, char* argv[])
                 }
                 break;
         }
-
+        if(id==0 && selection!=8 and selection!=6)
+        {
+            cout<<"processing ends!"<<endl;
+            cout<<"**** Display the window infinitely until any keypress ****"<<endl;
+            imshow("image", img);
+            waitKey(0);
+            destroyAllWindows();
+        }
     }
     if(id==0)
     {
         cout<<"program ends!"<<endl;
-        imshow("image", img);
-        waitKey(0);
-        // imwrite( "gray_image.jpg", img );
     }
     
     delete[] send_counts;

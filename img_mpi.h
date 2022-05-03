@@ -17,6 +17,7 @@ Mat distribute_image_full(const int &, const int &, const int &, const int &, co
 void update_image_properties(const int &, const Mat &, int &, int &, int &, int &); //Send the image properties from the ROOT to other processes
 void print_send_buffers(const int &, const int &, int * , int *, int &, int &); //Check *send_counts and * send_index
 void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &); 
+void img_contrast_brightness_mpi(const int &, const int &, int *, int *, Mat &); 
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
 void img_rotation_mpi(const int &, const int &, int *, int *, Mat &);
 void img_blurring_mpi(const int &, const int &, int *, int *, Mat &); 

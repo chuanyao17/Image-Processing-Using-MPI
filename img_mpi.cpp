@@ -22,6 +22,12 @@
 #define sigma_min_value 0.5
 #define sigma_max_value 5
 
+#define alpha_min_value 0.1
+#define alpha_max_value 3
+
+#define beta_min_value 0
+#define beta_max_value 100
+
 using namespace cv;
 using namespace std;
 
@@ -48,7 +54,7 @@ void get_gaussian_kernel(const int &size, double* gaus, const double &sigma)
            gaus[i*size+j]/=sum;
         //    printf("gaus[%d]=%lf ", (i*size+j), gaus[i*size+j]);
         }
-        printf("\n");
+        // printf("\n");
     }
 
 }
@@ -256,6 +262,65 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     // waitKey(0);
     // destroyAllWindows();
     sub_img=img_grayscale(sub_img);
+    if(id==0)
+    {
+        img = Mat( img_row_num, img_col_num, img.type());
+    }
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+    return;
+}
+
+void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+{
+    if(id==0)
+    {
+        printf("img_grayscale is working\n");
+    }
+
+    int img_row_num; //Store the number of the input image's row
+    int img_col_num; //Store the number of the input image's col
+    int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
+	Mat sub_img; //Store the distributed sub-image
+
+    double alpha;
+    double beta;
+
+    double alpha_min=alpha_min_value;
+    double alpha_max=alpha_max_value;
+
+    double beta_min=beta_min_value;
+    double beta_max=beta_max_value;
+
+    if(id==0)
+    {
+        cout<<"Please input a number between "<<alpha_min<<" to "<<alpha_max<<" as the constrast ratio"<<endl;
+    }
+    
+    alpha=get_valid_input<double>(id, alpha_min, alpha_max);
+
+    if(id==0)
+    {
+        cout<<"Please input a number between "<<beta_min<<" to "<<beta_max<<" as the increasing brightness"<<endl;
+    }
+    
+    beta=get_valid_input<double>(id, beta_min, beta_max);
+    
+
+	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
+    update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+	// print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
+    // cout << "sub_size " << sub_img.size()<< " sub_row " << sub_img.rows<< " sub_col " << sub_img.cols   << " sub_img_type " << sub_img.type() <<" id "<<id <<endl;
+    // imshow("image", sub_img);
+    // waitKey(0);
+    // destroyAllWindows();
+    sub_img=img_contrast_brightness(sub_img, alpha, beta);
+    if(id==0)
+    {
+        img = Mat( img_row_num, img_col_num, img.type());
+    }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     return;

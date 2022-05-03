@@ -120,83 +120,29 @@ Mat img_rotation(const Mat &img, const int &row, const int &col, const int &prev
 	}
     return output_img;
 } 
-void img_brightness(Mat &img, float alpha, float beta)
+Mat img_contrast_brightness(const Mat &img, const double &alpha, const double &beta)
 {
-    printf("img_brightness is working\n");
-	Mat dst = img.clone();
-	for(int row =0 ; row < img.rows ; row++){
-        for(int col = 0 ; col < img.cols ; col++){
-            //如果输入图像为三通道 RGB
-            if(img.channels() == 3){
-                //对每个通道上的数据做计算
-                dst.at<Vec3b>(row,col)[0] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[0]*alpha + beta);
-                dst.at<Vec3b>(row,col)[1] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[1]*alpha + beta);
-                dst.at<Vec3b>(row,col)[2] = saturate_cast<uchar>(img.at<Vec3b>(row,col)[2]*alpha + beta);
-                //如果输入图像为单通道 灰度
-            }else if(img.channels() == 1){
-                //对单一通道做计算
-                dst.at<uchar>(row,col) = saturate_cast<uchar>(img.at<uchar>(row,col)*alpha + beta);
-            }
-        }
-        
-    }
-    imshow("brightness",dst);
-    waitKey(0);
-	destroyAllWindows();
-    return;
-}
-void img_contrast(Mat &img, float percent)
-{
-    printf("img_contrast is working\n");
-	float alpha = percent / 100.f;
-	alpha = max(-1.f, min(1.f, alpha));
-	Mat temp = img.clone();
-	int row = img.rows;
-	int col = img.cols;
-	int thresh = 127;
-	for (int i = 0; i < row; ++i)
+    Mat output_img=Mat(img.size(), img.type()); //Initialize the output image
+	if(img.rows==0)
 	{
-		uchar *t = temp.ptr<uchar>(i);
-		uchar *s = img.ptr<uchar>(i);
-		for (int j = 0; j < col; ++j)
+		return output_img;
+	}
+	int row=img.rows;
+	int col=img.cols;
+	
+	for(int i=0;i<row;i++)
+	{
+		for(int j=0;j<col;j++)
 		{
-			uchar b = s[3 * j];
-			uchar g = s[3 * j + 1];
-			uchar r = s[3 * j + 2];
-			int newb, newg, newr;
-			if (alpha == 1)
-			{
-				t[3 * j + 2] = r > thresh ? 255 : 0;
-				t[3 * j + 1] = g > thresh ? 255 : 0;
-				t[3 * j] = b > thresh ? 255 : 0;
-				continue;
-			}
-			else if (alpha >= 0)
-			{
-				newr = static_cast<int>(thresh + (r - thresh) / (1 - alpha));
-				newg = static_cast<int>(thresh + (g - thresh) / (1 - alpha));
-				newb = static_cast<int>(thresh + (b - thresh) / (1 - alpha));
-			}
-			else {
-				newr = static_cast<int>(thresh + (r - thresh) * (1 + alpha));
-				newg = static_cast<int>(thresh + (g - thresh) * (1 + alpha));
-				newb = static_cast<int>(thresh + (b - thresh) * (1 + alpha));
- 
-			}
-			newr = max(0, min(255, newr));
-			newg = max(0, min(255, newg));
-			newb = max(0, min(255, newb));
-			t[3 * j + 2] = static_cast<uchar>(newr);
-			t[3 * j + 1] = static_cast<uchar>(newg);
-			t[3 * j] = static_cast<uchar>(newb);
+			output_img.at<Vec3b>(i,j)[0] = saturate_cast<uchar>(img.at<Vec3b>(i,j)[0]*alpha + beta);
+            output_img.at<Vec3b>(i,j)[1] = saturate_cast<uchar>(img.at<Vec3b>(i,j)[1]*alpha + beta);
+            output_img.at<Vec3b>(i,j)[2] = saturate_cast<uchar>(img.at<Vec3b>(i,j)[2]*alpha + beta);
 		}
 	}
-	// return temp;
-	imshow("contrast", temp);
-	waitKey(0);
-    destroyAllWindows();
-	return;
+
+    return output_img;
 }
+
 Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border, const double *gaussian_kernel ,const int& blur_method)
 {
     Mat output_img=Mat(img.size(), img.type()); //Initialize the output image
