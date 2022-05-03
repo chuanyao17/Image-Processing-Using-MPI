@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <algorithm> 
+#include <math.h>
 #include "opencv2/opencv.hpp"
 #include "mpi.h"
 #include "img_mpi.h"
@@ -13,9 +14,44 @@
 #define img_maximum_len 4000
 // #define border_width 1
 // #define border_width 2
+#define averaging_blur 1
+#define gaussian_blur 2
+#define kernel_min_size 3
+#define kernel_max_size 9
+
+#define sigma_min_value 0.5
+#define sigma_max_value 5
 
 using namespace cv;
 using namespace std;
+
+void get_gaussian_kernel(const int &size, double* gaus, const double &sigma)
+{
+    
+    double sum=0.0;
+
+    int offset=size/2;
+
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<size;j++)
+        { 
+            gaus[i*size+j]= (exp(-((i-offset)*(i-offset)+(j-offset)*(j-offset)) / (2*sigma*sigma) )) / (2*sigma*sigma*M_PI);
+            sum+=gaus[i*size+j];
+        }
+    }
+
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<size;j++)
+        {
+           gaus[i*size+j]/=sum;
+        //    printf("gaus[%d]=%lf ", (i*size+j), gaus[i*size+j]);
+        }
+        printf("\n");
+    }
+
+}
 
 void update_send_index(const int &p, int *send_counts , int *send_index)
 {
@@ -263,7 +299,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     
     if(id==0)
     {
-        cout<<"please input a number between "<<min_height_ratio<<" to "<<max_height_ratio<<" as the zooming ratio of the row axis"<<endl;
+        cout<<"Please input a number between "<<min_height_ratio<<" to "<<max_height_ratio<<" as the zooming ratio of the row axis"<<endl;
     }
     
     height_ratio=get_valid_input<double>(id, min_height_ratio, max_height_ratio);
@@ -280,7 +316,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
 
     if(id==0)
     {
-        cout<<"please input a number between "<<min_width_ratio<<" to "<<max_width_ratio<<" as the zooming ratio of the col axis"<<endl;
+        cout<<"Please input a number between "<<min_width_ratio<<" to "<<max_width_ratio<<" as the zooming ratio of the col axis"<<endl;
     }
     
     
@@ -349,7 +385,7 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
 
     if(id==0)
     {
-        cout<<"please select direction: 1. clockwise 2. counter-clockwise"<<endl;
+        cout<<"Please select direction: 1. clockwise 2. counter-clockwise"<<endl;
     }
     dir_selection=get_valid_input<int>(id,clockwise,counter_clockwise);
     if(dir_selection==clockwise)
@@ -401,40 +437,51 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
 void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
     
-    int blurr_method;
-    int method_start=1;
-    int method_end=2;
+    int blur_method;
+    int method_start=averaging_blur;
+    int method_end=gaussian_blur;
     
-    int blurr_kernal_size;
-    int kernal_size_start=1;
-    int kernal_size_end=3;
+    int blur_kernel_size;
+    int kernel_size_start=kernel_min_size/2;
+    int kernel_size_end=kernel_max_size/2;
+
+    int border_width;
+
+    double sigma_min=sigma_min_value;
+    double sigma_max=sigma_max_value;
+    double sigma;
+
+    double *gaus;
+    
     if(id==0)
     {
-        cout<<"please select blurring method: 1. Averaging blur 2. Gaussian Blur"<<endl;
+        cout<<"Please select blurring method: 1. Averaging Blur 2. Gaussian Blur"<<endl;
     }
-    blurr_method=get_valid_input<int>(id,method_start,method_end);
+    blur_method=get_valid_input<int>(id,method_start,method_end);
+
+    if(id==0 && blur_method==gaussian_blur)
+    {
+        cout<<"Please select the value of sigma from 0.5 to 5, the higer value the better blurring effect"<<endl;
+    }
+    if(blur_method==gaussian_blur)
+    {
+        sigma=get_valid_input<double>(id,sigma_min,sigma_max);
+    }
+    
+    
     if(id==0)
     {
-        cout<<"please select the size of the blurrkernal: 1. 3*3  2. 5*5  3. 9*9 "<<endl;
+        cout<<"Please select the size of the blur kernal: 1. 3*3  2. 5*5  3. 7*7 4. 9*9 "<<endl;
     }
-    blurr_kernal_size=get_valid_input<int>(id,kernal_size_start,kernal_size_end);
-
-    switch(blurr_method)
+    border_width=get_valid_input<int>(id,kernel_size_start,kernel_size_end);
+    blur_kernel_size= border_width*2+1;
+    
+    if(blur_method==gaussian_blur)
     {
-        case 1:
-            blurr_kernal_size=3;
-            break;
-        case 2:
-            blurr_kernal_size=5;
-            break;
-        case 3:
-            blurr_kernal_size=9;
-            break;
-        default:
-            break;
+        gaus=new double[blur_kernel_size*blur_kernel_size];
+        get_gaussian_kernel(blur_kernel_size, gaus, sigma);
     }
-
-    int border_width=blurr_kernal_size/2;
+    
     
     
     if(id==0)
@@ -471,7 +518,7 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     // imshow("image", sub_img);
     // waitKey(0);
     // destroyAllWindows();
-    sub_img=img_blurring(sub_img, id, p, border_width);
+    sub_img=img_blurring(sub_img, id, p, border_width, gaus ,blur_method);
 
     img_col_num-=(border_width*2);
     if(id==0)
@@ -481,6 +528,12 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    
+    if(blur_method==gaussian_blur)
+    {
+        delete[] gaus;
+    }
+    
 
     return;
 }

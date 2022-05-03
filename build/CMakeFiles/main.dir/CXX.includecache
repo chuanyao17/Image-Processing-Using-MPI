@@ -13,6 +13,8 @@ cstdio
 -
 algorithm
 -
+math.h
+-
 opencv2/opencv.hpp
 /home/chuanyao17/image-processing-using-mpi/opencv2/opencv.hpp
 mpi.h

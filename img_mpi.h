@@ -8,6 +8,7 @@
 using namespace cv;
 using namespace std;
 
+void get_gaussian_kernel(const int &, double*, const double &);
 void update_send_index(const int &, int *, int *); //Update send_index by calculated send_counts
 void update_communication_arrays (const int &, const int &, const int &, const int &, int *, int *); //Initialize communication arrays to pass to MPI gather/scatterv
 void update_communication_arrays_border (const int &, const int &, const int &, const int &, int *, int *, const int &); //Initialize communication arrays to pass to MPI gather/scatterv with border width as offset
@@ -19,6 +20,8 @@ void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &);
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
 void img_rotation_mpi(const int &, const int &, int *, int *, Mat &);
 void img_blurring_mpi(const int &, const int &, int *, int *, Mat &); 
+
+
 
 //Send the input of the input stream from the ROOT to other processes
 template <typename T>
