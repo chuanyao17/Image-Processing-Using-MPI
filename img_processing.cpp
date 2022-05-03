@@ -201,9 +201,8 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 	{
 		return output_img;
 	}
-	int gaussian_kernel[9]={1,2,1,2,4,2,1,2,1}; //Need to divided by 16 for all elements when calculating
-	Vec3b img_window[9]; //Convolve the image by 3*3 window size with gaussian kernel
-	Vec3b color; //Store the result of the convolution
+	// int gaussian_kernel[9]={1,2,1,2,4,2,1,2,1}; //Need to divided by 16 for all elements when calculating	
+	int gaussian_kernel[25]={1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1}; //Need to divided by 16 for all elements when calculating
 	int kernel_size=border*2+1;
 	
 	int row=img.rows;
@@ -212,9 +211,9 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 	output_img=Mat(row-(border*2),col-(border*2), img.type());//Initialize the output image
 	// cout<<"out_row= "<<output_img.rows<<" out_col= "<<output_img.cols<<" id= "<<id<<endl;
 
-	uchar b;
-	uchar g;
-	uchar r;
+	int b; //Store the result (blue) of the convolution
+	int g; //Store the result (green) of the convolution
+	int r; //Store the result (red) of the convolution
 
 	for(int i=border;i<row-border;i++)
 	// for(int i=border;i<3;i++)
@@ -222,30 +221,29 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 		for(int j=border;j<col-border;j++)
 		// for(int j=border;j<3;j++)
 		{
-			color=(0,0,0);
-			b=(0);
-			g=(0);
-			r=(0);
+			
+			b=0;
+			g=0;
+			r=0;
 			
 			// 卷积过程中取周围的 3x3 个像素（包括自身）
-			Vec3b p1 = img.at<Vec3b>(i - 1, j - 1);
-			Vec3b p2 = img.at<Vec3b>(i - 1, j);
-			Vec3b p3 = img.at<Vec3b>(i- 1, j + 1);
-			Vec3b p4 = img.at<Vec3b>(i, j - 1);
-			Vec3b p5 = img.at<Vec3b>(i, j);
-			Vec3b p6 = img.at<Vec3b>(i, j + 1);
-			Vec3b p7 = img.at<Vec3b>(i + 1, j - 1);
-			Vec3b p8 = img.at<Vec3b>(i + 1, j);
-			Vec3b p9 = img.at<Vec3b>(i+ 1, j + 1);
- 
+			// Vec3b p1 = img.at<Vec3b>(i - 1, j - 1);
+			// Vec3b p2 = img.at<Vec3b>(i - 1, j);
+			// Vec3b p3 = img.at<Vec3b>(i- 1, j + 1);
+			// Vec3b p4 = img.at<Vec3b>(i, j - 1);
+			// Vec3b p5 = img.at<Vec3b>(i, j);
+			// Vec3b p6 = img.at<Vec3b>(i, j + 1);
+			// Vec3b p7 = img.at<Vec3b>(i + 1, j - 1);
+			// Vec3b p8 = img.at<Vec3b>(i + 1, j);
+			// Vec3b p9 = img.at<Vec3b>(i+ 1, j + 1);
 			// 分通道取值相加
-			int b_n = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
-			int g_n = p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1] + p8[1] + p9[1];
-			int r_n = p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2] + p8[2] + p9[2];
-
-			// int b_ = p1[0]*gaussian_kernel[0] + p2[0]*gaussian_kernel[1] + p3[0]*gaussian_kernel[2] + p4[0]*gaussian_kernel[3] + p5[0]*gaussian_kernel[4] + p6[0]*gaussian_kernel[5] + p7[0]*gaussian_kernel[6] + p8[0]*gaussian_kernel[7] + p9[0]*gaussian_kernel[8];
-			// int g_ = p1[1]*gaussian_kernel[0] + p2[1]*gaussian_kernel[1] + p3[1]*gaussian_kernel[2] + p4[1]*gaussian_kernel[3] + p5[1]*gaussian_kernel[4] + p6[1]*gaussian_kernel[5] + p7[1]*gaussian_kernel[6] + p8[1]*gaussian_kernel[7] + p9[1]*gaussian_kernel[8];
-			// int r_ = p1[2]*gaussian_kernel[0] + p2[2]*gaussian_kernel[1] + p3[2]*gaussian_kernel[2] + p4[2]*gaussian_kernel[3] + p5[2]*gaussian_kernel[4] + p6[2]*gaussian_kernel[5] + p7[2]*gaussian_kernel[6] + p8[2]*gaussian_kernel[7] + p9[2]*gaussian_kernel[8];
+			// int b_n = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
+			// int g_n = p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1] + p8[1] + p9[1];
+			// int r_n = p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2] + p8[2] + p9[2];
+			// gaussian通道取值相加
+			// int b_n = p1[0]*gaussian_kernel[0] + p2[0]*gaussian_kernel[1] + p3[0]*gaussian_kernel[2] + p4[0]*gaussian_kernel[3] + p5[0]*gaussian_kernel[4] + p6[0]*gaussian_kernel[5] + p7[0]*gaussian_kernel[6] + p8[0]*gaussian_kernel[7] + p9[0]*gaussian_kernel[8];
+			// int g_n = p1[1]*gaussian_kernel[0] + p2[1]*gaussian_kernel[1] + p3[1]*gaussian_kernel[2] + p4[1]*gaussian_kernel[3] + p5[1]*gaussian_kernel[4] + p6[1]*gaussian_kernel[5] + p7[1]*gaussian_kernel[6] + p8[1]*gaussian_kernel[7] + p9[1]*gaussian_kernel[8];
+			// int r_n = p1[2]*gaussian_kernel[0] + p2[2]*gaussian_kernel[1] + p3[2]*gaussian_kernel[2] + p4[2]*gaussian_kernel[3] + p5[2]*gaussian_kernel[4] + p6[2]*gaussian_kernel[5] + p7[2]*gaussian_kernel[6] + p8[2]*gaussian_kernel[7] + p9[2]*gaussian_kernel[8];
 
 			// printf("b =%d,%d g=%d,%d r=%d,%d \n",(b/16),saturate_cast<uchar>(b / 16),(g/16),saturate_cast<uchar>(g / 16),(r/16),saturate_cast<uchar>(r / 16));
 			// 分通道求均值
@@ -267,9 +265,16 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 			{
 				for(int kernel_j=0;kernel_j<kernel_size;kernel_j++)
 				{
-					// color+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))*gaussian_kernel[kernel_i*kernel_size+kernel_j]/16);
-					color+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))/(kernel_size*kernel_size));
+				
+					// printf("gaussian_kernel[%d]=%d\n",(kernel_i*kernel_size+kernel_j),gaussian_kernel[kernel_i*kernel_size+kernel_j]);
 					
+					//Gaussian_blurr
+					b+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[0]*gaussian_kernel[kernel_i*kernel_size+kernel_j]);
+					g+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[1]*gaussian_kernel[kernel_i*kernel_size+kernel_j]);
+					r+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[2]*gaussian_kernel[kernel_i*kernel_size+kernel_j]);
+					
+					
+					// Average_blurr
 					// b+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[0]);
 					// g+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[1]);
 					// r+=(img.at<Vec3b>((i+kernel_i-border),(j+kernel_j-border))[2]);
@@ -281,16 +286,26 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 			}
 			
 			
-			// cout<<" cout= "<< (int)b << " "<<(int)g<<" "<<(int)r<<endl;
-			// cout<<"color= "<<color <<endl;
-			// printf("b =%d,%d g=%d,%d r=%d,%d \n",b_n/9,b,g_n/9,g,r_n/9,r);
+		
+			// printf("b =%d,%d g=%d,%d r=%d,%d \n",b_n/16,b/16,g_n/16,g/16,r_n/16,r/16);
 			
 			
-			output_img.at<Vec3b>(i-border,j-border)=color;
+			
 			// output_img.at<Vec3b>(i-border,j-border)=img.at<Vec3b>(i,j);
-			// output_img.at<Vec3b>(i-border,j-border)[0]=saturate_cast<uchar>(b / 9);
-			// output_img.at<Vec3b>(i-border,j-border)[1]=saturate_cast<uchar>(g / 9);
-			// output_img.at<Vec3b>(i-border,j-border)[2]=saturate_cast<uchar>(r / 9);
+			
+			//Average_blurr
+			// output_img.at<Vec3b>(i-border,j-border)[0]=saturate_cast<uchar>(b / (kernel_size*kernel_size));
+			// output_img.at<Vec3b>(i-border,j-border)[1]=saturate_cast<uchar>(g / (kernel_size*kernel_size));
+			// output_img.at<Vec3b>(i-border,j-border)[2]=saturate_cast<uchar>(r / (kernel_size*kernel_size));
+
+			//Gaussian_blurr
+			// output_img.at<Vec3b>(i-border,j-border)[0]=saturate_cast<uchar>(b / 16);
+			// output_img.at<Vec3b>(i-border,j-border)[1]=saturate_cast<uchar>(g / 16);
+			// output_img.at<Vec3b>(i-border,j-border)[2]=saturate_cast<uchar>(r / 16);
+
+			output_img.at<Vec3b>(i-border,j-border)[0]=saturate_cast<uchar>(b / 273);
+			output_img.at<Vec3b>(i-border,j-border)[1]=saturate_cast<uchar>(g / 273);
+			output_img.at<Vec3b>(i-border,j-border)[2]=saturate_cast<uchar>(r / 273);
 		}
 	}
 
@@ -328,50 +343,8 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 	// 	}
 	// }
 
- 
-	
 
 	return output_img;
-    // int h = img.rows;
-	// int w = img.cols;
- 
-	// // 代码实现：3x3 均值模糊
-	// Mat dst = img.clone();
-	// for (int row = 1; row < h - 1; row++) {
-	// 	for (int col = 1; col < w - 1; col++) {
-	// 		// 卷积过程中取周围的 3x3 个像素（包括自身）
-	// 		Vec3b p1 = img.at<Vec3b>(row - 1, col - 1);
-	// 		Vec3b p2 = img.at<Vec3b>(row - 1, col);
-	// 		Vec3b p3 = img.at<Vec3b>(row - 1, col + 1);
-	// 		Vec3b p4 = img.at<Vec3b>(row, col - 1);
-	// 		Vec3b p5 = img.at<Vec3b>(row, col);
-	// 		Vec3b p6 = img.at<Vec3b>(row, col + 1);
-	// 		Vec3b p7 = img.at<Vec3b>(row + 1, col - 1);
-	// 		Vec3b p8 = img.at<Vec3b>(row + 1, col);
-	// 		Vec3b p9 = img.at<Vec3b>(row + 1, col + 1);
- 
-	// 		// 分通道取值相加
-	// 		int b = p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0] + p8[0] + p9[0];
-	// 		int g = p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1] + p8[1] + p9[1];
-	// 		int r = p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2] + p8[2] + p9[2];
- 
-	// 		// 分通道求均值
-	// 		dst.at<Vec3b>(row, col)[0] = saturate_cast<uchar>(b / 9);
-	// 		dst.at<Vec3b>(row, col)[1] = saturate_cast<uchar>(g / 9);
-	// 		dst.at<Vec3b>(row, col)[2] = saturate_cast<uchar>(r / 9);
-	// 	}
-	// }
-	// imshow("2--blur", dst);
- 
-	// // 直接调用 OpenCV API: 3x3 均值模糊
-	// // Mat dst_opencv;
-	// // blur(img, dst_opencv, Size(3, 3), Point(-1, -1), BORDER_DEFAULT);
-	// // imshow("3--blur(OpenCV API)", dst_opencv);
- 
-	// waitKey(0);
-    // destroyAllWindows();
-    // // waitKey(1);
-	// return;
 }
 
 Mat img_grayscale(const Mat &img)

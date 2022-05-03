@@ -11,7 +11,8 @@
 
 #define img_minimum_len 1
 #define img_maximum_len 4000
-#define border_width 1
+// #define border_width 1
+#define border_width 2
 
 using namespace cv;
 using namespace std;
