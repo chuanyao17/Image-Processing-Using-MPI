@@ -202,7 +202,9 @@ Mat img_blurring(const Mat &img, const int &id, const int &p, const int &border)
 		return output_img;
 	}
 	// int gaussian_kernel[9]={1,2,1,2,4,2,1,2,1}; //Need to divided by 16 for all elements when calculating	
-	int gaussian_kernel[25]={1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1}; //Need to divided by 16 for all elements when calculating
+	int gaussian_kernel[25]={1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,
+	4,16,26,16,4,1,4,7,4,1}; //Need to divided by 16 for all elements when calculating
+	// int gaussian_kernel[25]={1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1}; //Need to divided by 16 for all elements when calculating
 	int kernel_size=border*2+1;
 	
 	int row=img.rows;

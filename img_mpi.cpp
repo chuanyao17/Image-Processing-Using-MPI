@@ -12,7 +12,7 @@
 #define img_minimum_len 1
 #define img_maximum_len 4000
 // #define border_width 1
-#define border_width 2
+// #define border_width 2
 
 using namespace cv;
 using namespace std;
@@ -400,6 +400,43 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
 
 void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
 {
+    
+    int blurr_method;
+    int method_start=1;
+    int method_end=2;
+    
+    int blurr_kernal_size;
+    int kernal_size_start=1;
+    int kernal_size_end=3;
+    if(id==0)
+    {
+        cout<<"please select blurring method: 1. Averaging blur 2. Gaussian Blur"<<endl;
+    }
+    blurr_method=get_valid_input<int>(id,method_start,method_end);
+    if(id==0)
+    {
+        cout<<"please select the size of the blurrkernal: 1. 3*3  2. 5*5  3. 9*9 "<<endl;
+    }
+    blurr_kernal_size=get_valid_input<int>(id,kernal_size_start,kernal_size_end);
+
+    switch(blurr_method)
+    {
+        case 1:
+            blurr_kernal_size=3;
+            break;
+        case 2:
+            blurr_kernal_size=5;
+            break;
+        case 3:
+            blurr_kernal_size=9;
+            break;
+        default:
+            break;
+    }
+
+    int border_width=blurr_kernal_size/2;
+    
+    
     if(id==0)
     {
         printf("img_blurring is working\n");
