@@ -5,8 +5,8 @@
 #include "img_processing.h"
 #include "img_mpi.h"
 
-#define min 1
-#define max 8
+#define min 1 //Represent the minimum selection number
+#define max 8 //Represent the maximum selection number
 
 using namespace cv;
 using namespace std;
@@ -19,22 +19,18 @@ int main(int argc, char* argv[])
     Mat img; //Store the input image
     Mat prev_img; //Store the previous modified image
  
-
-    int p, id; //The number of the processes and thier id
-
     int *send_counts; //Store the size of the assgined sub-image of each process
     int *send_index; //Store the start index of the assgined sub-image of each process
 
-    int min_selection=min;
-    int max_selection=max;
-    
+    int min_selection=min; //Represent the minimum selection number
+    int max_selection=max; //Represent the maximum selection number
+
+    int p, id; //The number of the processes and thier id
     MPI_Status status;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
     MPI_Comm_rank(MPI_COMM_WORLD, &id);
     
-    
-
     //Read the image and its properties in the ROOT process:
     if (id==0)
     {
@@ -56,6 +52,7 @@ int main(int argc, char* argv[])
         }
         cout<<"program starts:  "<<endl;
 
+        //Initialize the previous image to be the input image
         prev_img=img;
         
 
@@ -69,26 +66,20 @@ int main(int argc, char* argv[])
     //Initialize the sending buffers as communication_arrays for MPI
     send_counts = new int[p]; 
     send_index = new int[p]; 
-    
-    
-    // img_grayscale(p, id, send_counts , send_index, img);
-    
-    // img_zooming(img,0.5,2);
    
     MPI_Barrier(MPI_COMM_WORLD);
+    
+    //Keep executing various image processing function until exit
     while (stop)
     {
         if(id==0)
         {
-            // cout<<"Please select: 1.Image Zooming 2.Image Rotation 3.Image Contrast & Brightness 4.Image Blurring 5.Image Grayscale"<<endl
-            // <<"               6.Image Saving  7.Back to only one previous step               8.Exit"<<endl;
             cout<<"Please select:"<<endl<<" 1.Image Zooming"<<endl<<" 2.Image Rotation"<<endl<<" 3.Image Contrast & Brightness"<<endl<<" 4.Image Blurring"<<endl<<" 5.Image Grayscale"
             <<endl<<" 6.Image Saving"<<endl<<" 7.Back to only one previous step"<<endl<<" 8.Exit"<<endl;
         }
+        
         selection=get_valid_input<int>(id, min_selection, max_selection);
-        // char test=get_valid_input<char>(id);
-        // cout<<test<<" id= "<< id<<endl;
-        // cout<<selection<<" id= "<< id<<endl;
+     
         switch (selection)
         {
             case 1:
@@ -127,6 +118,8 @@ int main(int argc, char* argv[])
                 }
                 break;
         }
+        
+        //The modified image will be shown after every process end
         if(id==0 && selection!=8 and selection!=6)
         {
             cout<<"processing ends!"<<endl;
@@ -145,5 +138,4 @@ int main(int argc, char* argv[])
     delete[] send_index;
     MPI_Finalize();
     return 0;
-
 }
