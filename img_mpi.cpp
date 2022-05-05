@@ -82,6 +82,13 @@ void update_communication_arrays(const int &p, const int &img_row_num, const int
     }
 }
 
+void update_communication_arrays_zoom(const int &p, const int &id, const Mat &sub_img, int *send_counts , int *send_index)
+{
+    send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
+    MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
+    update_send_index(p, send_counts , send_index);
+}
+
 // void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
 // {
 //     int sub_row_num;
@@ -347,11 +354,16 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     sub_img=img_zooming(sub_img, height_ratio, width_ratio);
 
     //Update communication arrays by each sub_img
-    send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
-    MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
-    update_send_index(p, send_counts , send_index);
 
-    // Reset the input image rows based on the sub-images
+    // send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
+    // MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
+    // update_send_index(p, send_counts , send_index);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+
+    update_communication_arrays_zoom(p, id, sub_img, send_counts, send_index);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+
+    // Reset the input image rows based on sum of all the sub-images' row
     MPI_Allreduce(&sub_img.rows, &img_row_num, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     // Reset the input image cols based on the original input cols times the width ratio
     img_col_num=img_col_num*width_ratio;
