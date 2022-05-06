@@ -13,7 +13,9 @@ void update_send_index(const int &, int *, int *); //Update send_index by calcul
 void update_communication_arrays (const int &, const int &, const int &, const int &, int *, int *); //Initialize communication arrays to pass to MPI gather/scatterv
 void update_communication_arrays_border (const int &, const int &, const int &, const int &, int *, int *, const int &); //Initialize communication arrays to pass to MPI gather/scatterv with border width as offset
 void update_communication_arrays_zoom(const int &, const int &, const Mat &, int *, int *); //Initialize communication arrays based on the zoomed sub-images to pass to MPI gather/scatterv
+void update_communication_arrays_by_col(const int &, const int &, const int &, const int &, int *, int *, const bool);
 Mat distribute_image(const int &, const int &, const int &, const int &, const int &, const int *, const int *, const uchar *); //distribute the input image among each processor 
+Mat distribute_image_by_col(const int &, const int &, const int &, const int &, const int &, const int *, const int *, const uchar *);
 Mat distribute_image_full(const int &, const int &, const int &, const int &, const int &, const Mat &); //distribute the whole input image to each processor 
 void update_image_properties(const int &, const Mat &, int &, int &, int &, int &); //Send the image properties from the ROOT to other processes
 void print_send_buffers(const int &, const int &, int * , int *, int &, int &); //Check *send_counts and * send_index

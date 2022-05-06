@@ -680,7 +680,7 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
 
 
 
-void update_communication_arrays_by_col(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
+void update_communication_arrays_by_col(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const bool clock_wise)
 {
     
     int sub_col_num;
@@ -688,10 +688,30 @@ void update_communication_arrays_by_col(const int &p, const int &img_row_num, co
     
     // printf("img_row_num=%d, img_col_num=%d, img_ch_num=%d\n",img_row_num, img_col_num, img_ch_num);
 
+    // for(int i = 0; i < p; i++) {
+    //     sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
+    //     send_counts[i] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
+    //     send_index[i] = (((i*img_col_num)/p))*img_ch_num;
+    //     // printf("send_counts[%d]=%d , send_index[%d]=%d \n", i, send_counts[i], i, send_index[i] );
+    // }
+
+    int r;
+    int index_offset;
+    if(clock_wise) 
+	{
+        r=-1;
+        index_offset=0;
+	}
+	else
+	{ 
+        r=1;
+        index_offset=p-1;
+	}
+
     for(int i = 0; i < p; i++) {
         sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
-        send_counts[i] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
-        send_index[i] = (((i*img_col_num)/p))*img_ch_num;
+        send_counts[r*(index_offset-i)] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
+        send_index[r*(index_offset-i)] = (((i*img_col_num)/p))*img_ch_num;
         // printf("send_counts[%d]=%d , send_index[%d]=%d \n", i, send_counts[i], i, send_index[i] );
     }
     
@@ -745,7 +765,7 @@ void img_rotation_mpi_V2(const int &p, const int &id, int *send_counts , int *se
         clock_wise=true;
     }
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
-    update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, clock_wise);
     // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 
 	
@@ -764,9 +784,9 @@ void img_rotation_mpi_V2(const int &p, const int &id, int *send_counts , int *se
     sub_img=img_rotation_v2(sub_img, sub_img.rows, sub_img.cols, 0, clock_wise);
 
     cout<<sub_img.size()<<" "<<sub_img.type()<<" "<<" id= "<<id<<" "<<img.size()<<endl;
-    // imshow("image", sub_img);
-    // waitKey(0);
-    // destroyAllWindows();
+    imshow("image", sub_img);
+    waitKey(0);
+    destroyAllWindows();
     
     //Initialize the image and gather all the modified sub-images to be a full modified image
     if (id==0)
