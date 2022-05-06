@@ -678,3 +678,104 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
 //    if (id == (p-1)) free (buffer);
 // }
 
+
+
+void update_communication_arrays_by_col(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
+{
+    
+    int sub_col_num;
+    // int elements_num=img_row_num*img_ch_num; //Represent the total elements of a col
+    
+    // printf("img_row_num=%d, img_col_num=%d, img_ch_num=%d\n",img_row_num, img_col_num, img_ch_num);
+
+    for(int i = 0; i < p; i++) {
+        sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
+        send_counts[i] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
+        send_index[i] = (((i*img_col_num)/p))*img_ch_num;
+        // printf("send_counts[%d]=%d , send_index[%d]=%d \n", i, send_counts[i], i, send_index[i] );
+    }
+    
+}
+
+
+Mat distribute_image_by_col(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
+{   
+    int recv_counts=send_counts[id]; //Store the size of the sub-image's data
+    int elements_num=img_col_num*img_ch_num; //Represent the total elements of a row
+    int sub_img_col=send_counts[id]/img_ch_num; //Store the size of the sub-image's col
+    Mat sub_img(img_row_num, sub_img_col, img_type); //Construct the sub-image with (image's rows, assigned sub-image's col number, 3 channels)
+    
+    // //Assign the sublist from process 0 to each process
+    // MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+
+    for (int i = 0; i < img_row_num; i++) {
+    //   if (id == (p-1))
+    //      fread (buffer, datum_size, *n, infileptr);
+      MPI_Scatterv (img_data+i*elements_num, send_counts, send_index, MPI_UNSIGNED_CHAR,
+         sub_img.data+i*recv_counts, recv_counts,
+         MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+   }
+    return sub_img;
+}
+
+void img_rotation_mpi_V2(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+{
+    if(id==0)
+    {
+        printf("img_rotation\n");
+    }
+
+    int img_row_num; //Store the number of the input image's row
+    int img_col_num; //Store the number of the input image's col
+    int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
+    bool clock_wise=false;
+    int dir_selection; //Store the select direction 
+    int clockwise=1; //Represent the selection of clockwise to be 1
+    int counter_clockwise=2; //Represent the selection of counter clockwise to be 2
+	Mat sub_img; //Store the distributed sub-image
+
+    if(id==0)
+    {
+        cout<<"Please select direction: 1. clockwise 2. counter-clockwise"<<endl;
+    }
+    dir_selection=get_valid_input<int>(id,clockwise,counter_clockwise);
+    if(dir_selection==clockwise)
+    {
+        clock_wise=true;
+    }
+	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
+    update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+
+	
+    //Broadcast the whole input image to each processor
+    sub_img=distribute_image_by_col(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts , send_index, img.data);
+    // cout<<sub_img.size()<<" "<<sub_img.type()<<" "<<" id= "<<id<<" "<<img.size()<<endl;
+    // imshow("image", sub_img);
+    // waitKey(0);
+    // destroyAllWindows();
+    
+
+
+
+    // //Execute the image processing function based on the assigned image
+    // sub_img=img_rotation(sub_img, send_counts[id]/(img_row_num*img_ch_num), img_row_num, send_index[id]/(img_row_num*img_ch_num), clock_wise);
+    sub_img=img_rotation_v2(sub_img, sub_img.rows, sub_img.cols, 0, clock_wise);
+
+    cout<<sub_img.size()<<" "<<sub_img.type()<<" "<<" id= "<<id<<" "<<img.size()<<endl;
+    // imshow("image", sub_img);
+    // waitKey(0);
+    // destroyAllWindows();
+    
+    //Initialize the image and gather all the modified sub-images to be a full modified image
+    if (id==0)
+    {
+        img = Mat( img_col_num, img_row_num, img.type()); //Rows and cols are swapped because of the rotation
+    }
+    
+    update_communication_arrays (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
+    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
+    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    return;
+}

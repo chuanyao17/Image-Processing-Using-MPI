@@ -13,4 +13,4 @@ cp ../3x2_all_b.jpg .
 cp ../3x6_b_g_w.jpg .
 cp ../1x6.jpg .
 cp ../women.png .
-
+cp ../100x210_left.jpg .

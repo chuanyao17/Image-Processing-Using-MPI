@@ -120,6 +120,60 @@ Mat img_rotation(const Mat &img, const int &row, const int &col, const int &prev
 	}
     return output_img;
 } 
+
+Mat img_rotation_v2(const Mat &img, const int &row, const int &col, const int &prev_row, const bool clock_wise)
+{
+    
+	Mat output_img=Mat(col,row,img.type()); //Initialize the output image
+	if(img.rows==0)
+	{
+		return output_img;
+	}
+	
+	int src_i; //Store the coordinate i of the source image 
+	int src_j; //Store the coordinate j of the source image 
+	int r; // src_i = r * j ; src_j= -r* i
+	
+	int row_offset;
+	int col_offset;
+	int col_offset_coef;
+	int row_offset_coef;
+
+	
+	// cout<<" col= "<<img.cols<<" offset= "<<row_offset<<" id= "<<id<<endl;
+
+	if(clock_wise) 
+	{
+		r=-1; 
+		col_offset_coef=1;
+		row_offset_coef=0;
+	}
+	else
+	{
+		r=1; 
+		col_offset_coef=0;
+		row_offset_coef=1;
+	}
+	row_offset=((img.cols-1)*row_offset_coef-prev_row);
+	col_offset=(img.rows-1)*col_offset_coef;
+	// cout<<"row= "<<row<<" col= "<<col<<endl;
+
+	for(int i=0;i<col;i++)
+	{
+		for(int j=0;j<row;j++)
+		{
+			
+			src_i= r*(j-col_offset);
+			src_j= -r*(i-row_offset);
+			
+			// printf("(%d,%d), (%d,%d), (%d,%d)\n",i,j,src_i,src_j, (i-row_offset), (j-col_offset));	
+			// printf("(%d,%d), (%d,%d), (%d,%d)\n",i,j,src_i,src_j, i, j-col_offset);	
+			output_img.at<Vec3b>(i,j)= img.at<Vec3b>(src_i,src_j);
+		}
+	}
+    return output_img;
+} 
+
 Mat img_contrast_brightness(const Mat &img, const double &alpha, const double &beta)
 {
     Mat output_img=Mat(img.size(), img.type()); //Initialize the output image

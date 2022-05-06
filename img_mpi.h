@@ -20,7 +20,7 @@ void print_send_buffers(const int &, const int &, int * , int *, int &, int &); 
 void img_grayscale_mpi(const int &, const int &, int *, int *, Mat &); 
 void img_contrast_brightness_mpi(const int &, const int &, int *, int *, Mat &); 
 void img_zooming_mpi(const int &, const int &, int *, int *, Mat &);
-void img_rotation_mpi(const int &, const int &, int *, int *, Mat &);
+void img_rotation_mpi_V2(const int &, const int &, int *, int *, Mat &);
 void img_blurring_mpi(const int &, const int &, int *, int *, Mat &); 
 
 

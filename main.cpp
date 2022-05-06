@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
                 break;
             case 2:
                 prev_img=img; 
-                img_rotation_mpi(p, id, send_counts , send_index, img);
+                img_rotation_mpi_V2(p, id, send_counts , send_index, img);
                 break;
             case 3:
                 prev_img=img; 
