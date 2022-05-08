@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
 {
     int selection; //Select which img_processing function
     int stop=true; //Stop the program when stop equals to false
+    bool time_mode=false; 
     
     Mat img; //Store the input image
     Mat prev_img; //Store the previous modified image
@@ -25,7 +26,7 @@ int main(int argc, char* argv[])
     int min_selection=min; //Represent the minimum selection number
     int max_selection=max; //Represent the maximum selection number
 
-    int p, id; //The number of the processes and thier id
+    int p, id; //The number of the processes and thier id         
     MPI_Status status;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
@@ -34,23 +35,26 @@ int main(int argc, char* argv[])
     //Read the image and its properties in the ROOT process:
     if (id==0)
     {
-        //Check the valid input
-        if (argc!=2) 
+        //Check the valid input command line
+        if(argc >1)
+        {
+            //Read the image
+            img = cv::imread(argv[1]);
+            
+            //Check if it's empty
+            if (!img.data) 
+            {
+                printf("No image data \n");
+                return -1;
+            }
+        }
+        else
         {
             printf("Usage: %s filename\n", argv[0]);
             return -1;
         }
 
-        //Read the image
-        img = cv::imread(argv[1]);
-        
-        //Check if it's empty
-        if (!img.data) 
-        {
-            printf("No image data \n");
-            return -1;
-        }
-        cout<<"program starts:  "<<endl;
+        cout<<"Program starts:  "<<endl;
 
         //Initialize the previous image to be the input image
         prev_img=img;
@@ -62,12 +66,20 @@ int main(int argc, char* argv[])
         waitKey(0);
         destroyAllWindows();
     }
+    
+    //Start the time mode with arguments "-t"
+    if(argc > 2 && !strcmp(argv[2], "-t"))
+    {
+        time_mode=true;
+        if(id==0)
+        {
+            cout<<"Time mode starts!"<<endl;
+        }
+    }
 
     //Initialize the sending buffers as communication_arrays for MPI
     send_counts = new int[p]; 
     send_index = new int[p]; 
-   
-    MPI_Barrier(MPI_COMM_WORLD);
     
     //Keep executing various image processing function until exit
     while (stop)
@@ -77,30 +89,29 @@ int main(int argc, char* argv[])
             cout<<"Please select:"<<endl<<" 1.Image Zooming"<<endl<<" 2.Image Rotation"<<endl<<" 3.Image Contrast & Brightness"<<endl<<" 4.Image Blurring"<<endl<<" 5.Image Grayscale"
             <<endl<<" 6.Image Saving"<<endl<<" 7.Back to only one previous step"<<endl<<" 8.Exit"<<endl;
         }
-        
         selection=get_valid_input<int>(id, min_selection, max_selection);
-     
+
         switch (selection)
         {
             case 1:
                 prev_img=img; 
-                img_zooming_mpi(p, id, send_counts , send_index, img);
+                img_zooming_mpi(p, id, send_counts , send_index, img, time_mode);
                 break;
             case 2:
                 prev_img=img; 
-                img_rotation_mpi(p, id, send_counts , send_index, img);
+                img_rotation_mpi(p, id, send_counts , send_index, img, time_mode);
                 break;
             case 3:
                 prev_img=img; 
-                img_contrast_brightness_mpi(p, id, send_counts , send_index, img);
+                img_contrast_brightness_mpi(p, id, send_counts , send_index, img, time_mode);
                 break;
             case 4:
                 prev_img=img; 
-                img_blurring_mpi(p, id, send_counts , send_index, img);
+                img_blurring_mpi(p, id, send_counts , send_index, img, time_mode);
                 break;
             case 5:
                 prev_img=img; 
-                img_grayscale_mpi(p, id, send_counts , send_index, img);
+                img_grayscale_mpi(p, id, send_counts , send_index, img, time_mode);
                 break;
             case 6:
                 img_saving(id, img);
@@ -122,7 +133,7 @@ int main(int argc, char* argv[])
         //The modified image will be shown after every process end
         if(id==0 && selection!=8 and selection!=6)
         {
-            cout<<"processing ends!"<<endl;
+            cout<<"Processing ends!"<<endl;
             cout<<"**** Display the window infinitely until any keypress ****"<<endl;
             imshow("image", img);
             waitKey(0);
@@ -131,7 +142,7 @@ int main(int argc, char* argv[])
     }
     if(id==0)
     {
-        cout<<"program ends!"<<endl;
+        cout<<"Program ends!"<<endl;
     }
     
     delete[] send_counts;

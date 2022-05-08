@@ -207,7 +207,7 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
     }
 }
 
-void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img, const bool time_mode)
 {
     if(id==0)
     {
@@ -219,8 +219,16 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
     int img_ch_num; //Store the number of the input image's channel
     int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
+    double elapsed_time; //Time to compute the image processing function using MPI
 
+    if(time_mode==true)
+    {
+        //Start timer
+        MPI_Barrier (MPI_COMM_WORLD);
+        elapsed_time = - MPI_Wtime();
+    }
     
+
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
     
@@ -236,10 +244,16 @@ void img_grayscale_mpi(const int &p, const int &id, int *send_counts , int *send
         img = Mat( img_row_num, img_col_num, img.type());
     }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    if(id==0 && time_mode==true)
+    {
+        //Stop timer
+        elapsed_time += MPI_Wtime();
+        printf("Computation took %8.6f seconds.\n", elapsed_time);
+    }
     return;
 }
 
-void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img, const bool time_mode)
 {
     if(id==0)
     {
@@ -251,6 +265,7 @@ void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts ,
     int img_ch_num; //Store the number of the input image's channel
     int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
+    double elapsed_time; //Time to compute the image processing function using MPI
 
     double alpha; //Represent the image contrast ratio
     double beta;  //Represent the increasing image brightness
@@ -273,8 +288,14 @@ void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts ,
     }
     beta=get_valid_input<double>(id, beta_min, beta_max);
     
-
-	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
+    if(time_mode==true)
+    {
+        //Start timer
+        MPI_Barrier (MPI_COMM_WORLD);
+        elapsed_time = - MPI_Wtime();
+    }
+	
+    update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
 	
     //Distribute the whole input image to the sub-images for each processor
@@ -289,10 +310,16 @@ void img_contrast_brightness_mpi(const int &p, const int &id, int *send_counts ,
         img = Mat( img_row_num, img_col_num, img.type());
     }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    if(id==0 && time_mode==true)
+    {
+        //Stop timer
+        elapsed_time += MPI_Wtime();
+        printf("Computation took %8.6f seconds.\n", elapsed_time);
+    }
     return;
 }
 
-void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img, const bool time_mode)
 {
     if(id==0)
     {
@@ -305,6 +332,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     int img_ch_num; //Store the number of the input image's channel
     int img_type; //Store the input image's type
 	Mat sub_img; //Store the distributed sub-image
+    double elapsed_time; //Time to compute the image processing function using MPI
 
     double height_ratio; //Represent the zooming ratio of the row axis
     double width_ratio; //Represent the zooming ratio of the col axis
@@ -351,6 +379,13 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     width_ratio=get_valid_input<double>(id, min_width_ratio, max_width_ratio );
   	
 
+    
+    if(time_mode==true)
+    {
+        //Start timer
+        MPI_Barrier (MPI_COMM_WORLD);
+        elapsed_time = - MPI_Wtime();
+    }
 
 	//Distribute the whole input image to the sub-images for each processor
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
@@ -372,10 +407,16 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
         img = Mat( img_row_num, img_col_num, img.type());
     }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    if(id==0 && time_mode==true)
+    {
+        //Stop timer
+        elapsed_time += MPI_Wtime();
+        printf("Computation took %8.6f seconds.\n", elapsed_time);
+    }
     return;
 }
 
-void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img, const bool time_mode)
 {
     if(id==0)
     {
@@ -391,6 +432,7 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
     int clockwise=1; //Represent the selection of clockwise to be 1
     int counter_clockwise=2; //Represent the selection of counter clockwise to be 2
 	Mat sub_img; //Store the distributed sub-image
+    double elapsed_time; //Time to compute the image processing function using MPI
 
     if(id==0)
     {
@@ -401,6 +443,14 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
     {
         clock_wise=true;
     }
+
+    if(time_mode==true)
+    {
+        //Start timer
+        MPI_Barrier (MPI_COMM_WORLD);
+        elapsed_time = - MPI_Wtime();
+    }
+
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, clock_wise);
 	
@@ -425,27 +475,36 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
         update_communication_arrays_opposite (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
     }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    if(id==0 && time_mode==true)
+    {
+        //Stop timer
+        elapsed_time += MPI_Wtime();
+        printf("Computation took %8.6f seconds.\n", elapsed_time);
+    }
     return;
 }
 
-void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
+void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_index, Mat &img, const bool time_mode)
 {
     
     int blur_method; //Represent the selection of the blur method
     int method_start=averaging_blur; //Represent the first number of the selection of the blur method
     int method_end=gaussian_blur;    //Represent the last number of the selection of the blur method
-    
     int blur_kernel_size; //Store the size of the kernel
     int kernel_size_start=kernel_min_size/2; //Represent the first number of the selection of the kernel size
     int kernel_size_end=kernel_max_size/2;  //Represent the last number of the selection of the kernel size
-
     int border_width; //Store the border width to be added around the input image
-
     double sigma; //Store the sigma value for creating the gaussian kernel
     double sigma_min=sigma_min_value;
     double sigma_max=sigma_max_value;
-
     double *gaus; //Store the Gaussian kernel
+
+    int img_row_num; //Store the number of the input image's row
+    int img_col_num; //Store the number of the input image's col
+    int img_ch_num; //Store the number of the input image's channel
+    int img_type; //Store the input image's type
+	Mat sub_img; //Store the distributed sub-image
+    double elapsed_time; //Time to compute the image processing function using MPI
     
     if(id==0)
     {
@@ -468,6 +527,7 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     }
     border_width=get_valid_input<int>(id,kernel_size_start,kernel_size_end);
     
+
     //Set the kernel size based on the border width
     blur_kernel_size= border_width*2+1;
     
@@ -485,14 +545,14 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
         printf("img_blurring is working\n");
         copyMakeBorder(img, img, border_width, border_width, border_width, border_width, BORDER_REFLECT_101); //Create a border around the image
     }
-
-    int img_row_num; //Store the number of the input image's row
-    int img_col_num; //Store the number of the input image's col
-    int img_ch_num; //Store the number of the input image's channel
-    int img_type; //Store the input image's type
-	Mat sub_img; //Store the distributed sub-image
-
     
+    if(time_mode==true)
+    {
+        //Start timer
+        MPI_Barrier (MPI_COMM_WORLD);
+        elapsed_time = - MPI_Wtime();
+    }
+
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
     
     //Reset the number image row before the borders are added
@@ -524,6 +584,14 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     {
         delete[] gaus;
     }
+    
+    if(id==0 && time_mode==true)
+    {
+        //Stop timer
+        elapsed_time += MPI_Wtime();
+        printf("Computation took %8.6f seconds.\n", elapsed_time);
+    }
+    
     return;
 }
 
