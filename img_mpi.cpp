@@ -25,13 +25,6 @@
 #define beta_min_value 0    //Represent the minimum beta value for increasing the brightness
 #define beta_max_value 100  //Represent the maximum beta value for increasing the brightness
 
-
-
-#define BLOCK_LOW(id,p,n)  ((id)*(n)/(p))
-#define BLOCK_HIGH(id,p,n) (BLOCK_LOW((id)+1,p,n)-1)
-#define BLOCK_SIZE(id,p,n) \
-                     (BLOCK_HIGH(id,p,n)-BLOCK_LOW(id,p,n)+1)
-
 using namespace cv;
 using namespace std;
 
@@ -63,6 +56,7 @@ void get_gaussian_kernel(const int &size, double* gaus, const double &sigma)
 
 void update_send_index(const int &p, int *send_counts , int *send_index)
 {
+    send_index[0]=0;
     for(int i=1;i<p;i++)
     {
         send_index[i]=send_index[i-1]+send_counts[i-1]; //Update send_index by send_counts
@@ -82,37 +76,25 @@ void update_communication_arrays(const int &p, const int &img_row_num, const int
     }
 }
 
-void update_communication_arrays_zoom(const int &p, const int &id, const Mat &sub_img, int *send_counts , int *send_index)
+void update_communication_arrays_opposite(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index)
 {
-    send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
-    MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
+    
+    int sub_row_num;
+    int elements_num=img_col_num*img_ch_num; //Represent the total elements of a row
+    
+    for(int i = 0; i < p; i++) {
+        sub_row_num=((((i+1)*img_row_num)/p)-((i*img_row_num)/p));
+        send_counts[p-i-1] = sub_row_num*elements_num; //The number of elements is sub-rows * image's cols * image's channels, processor's index are assigned from the end to the ROOT.
+    }
     update_send_index(p, send_counts , send_index);
 }
 
-// void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
-// {
-//     int sub_row_num;
-//     int elements_num=img_col_num*img_ch_num; //Represent the total elements of a row
-//     int first; //Store the index of the first processor which contain non-zero assigned sub-rows 
-//     int last;   //Store the index of the last processor which contain non-zero assigned sub-rows 
-//     bool first_non_zeron_found=false;
-//     bool last_non_zero_found=false;
-//     for(int i=0;i<p;i++)
-//     {
-//         //Move index to the previous(upper) row based on the border width except the first processor which contain non-zero assigned sub-rows
-//         if(send_index[i]!=0)
-//         {
-//             send_index[i]-=(elements_num*border);
-            
-//         }
-
-//         //Add back the additional border elements to all the processor which contain non-zero assigned sub-rows
-//         if(send_counts[i]!=0)
-//         {
-//             send_counts[i]+=(elements_num*border*2);
-//         }
-//     }
-// }   
+void update_communication_arrays_zoom(const int &p, const int &id, const Mat &sub_img, int *send_counts , int *send_index)
+{
+    send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
+    MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD); //The number of elements of send_counts is based on each sub_imgs.
+    update_send_index(p, send_counts , send_index);
+}
 
 void update_communication_arrays_border(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const int &border)
 {
@@ -122,12 +104,14 @@ void update_communication_arrays_border(const int &p, const int &img_row_num, co
     {
         sub_row_num=((((i+1)*img_row_num)/p)-((i*img_row_num)/p));
         send_counts[i] = sub_row_num*elements_num; //The number of elements is sub-rows * image's cols * image's channels
+        
         //Add the additional border elements to all the processors which contain non-zero assigned sub-rows
         if(sub_row_num!=0)
         {
             send_counts[i]+=(elements_num*border*2);
         }
         send_index[i] = (((i*img_row_num)/p))*elements_num;
+        
         //Move index to the previous(upper) row based on the border width except the first processor which contain non-zero assigned sub-rows
         if(send_index[i]!=0)
         {
@@ -137,7 +121,32 @@ void update_communication_arrays_border(const int &p, const int &img_row_num, co
     }
 }   
 
+void update_communication_arrays_by_col(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const bool clock_wise)
+{
+    
+    int sub_col_num;
+    int r;
+    int index_offset;
+    if(clock_wise) 
+	{
+        r=-1;
+        index_offset=0;
+	}
+	else
+	{ 
+        r=1;
+        index_offset=p-1;
+	}
 
+    //If clock_wise is true, scatter the sub-image from the left to the right, otherwise opposite
+
+    for(int i = 0; i < p; i++) {
+        sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
+        send_counts[r*(index_offset-i)] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
+        send_index[r*(index_offset-i)] = (((i*img_col_num)/p))*img_ch_num;
+    }
+    
+}
 
 Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
 {   
@@ -148,16 +157,18 @@ Mat distribute_image(const int &id, const int &img_row_num, const int &img_col_n
     return sub_img;
 }
 
-Mat distribute_image_full(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const Mat &img)
+Mat distribute_image_by_col(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
 {   
+    int recv_counts=send_counts[id]; //Store the size of the sub-image's data
+    int elements_num=img_col_num*img_ch_num; //Represent the total elements of a row
+    int sub_img_col=send_counts[id]/img_ch_num; //Store the size of the sub-image's col
+    Mat sub_img(img_row_num, sub_img_col, img_type); //Construct the sub-image with (image's rows, assigned sub-image's col number, 3 channels)
     
-    Mat sub_img=Mat( img_row_num, img_col_num, img_type); //Construct the sub-image as same as the input image
-    if(id==0)
+    //Assign the sub-col from process 0 to each process with (img_row_num-1) times loops to get the whole sublist.
+    for (int i = 0; i < img_row_num; i++)
     {
-        sub_img=img.clone(); //Clone the input image the the sub-image
+        MPI_Scatterv (img_data+i*elements_num, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data+i*recv_counts, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     }
-    //Broadcast the sub-image to other processor from the ROOT
-    MPI_Bcast(sub_img.data, img_row_num*img_col_num*img_ch_num, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD );
     return sub_img;
 }
 
@@ -191,12 +202,6 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
         for(int i=0;i<p;i++)
         {
             cout<<send_index[i]<<" ";
-        }
-        cout<<endl;
-        cout<<"send_row= ";
-        for(int i=0;i<p;i++)
-        {
-            cout<<send_counts[i]/(img_col_num*img_ch_num)<<" ";
         }
         cout<<endl;
     }
@@ -354,14 +359,7 @@ void img_zooming_mpi(const int &p, const int &id, int *send_counts , int *send_i
     sub_img=img_zooming(sub_img, height_ratio, width_ratio);
 
     //Update communication arrays by each sub_img
-
-    // send_counts[id]=sub_img.rows*sub_img.cols*sub_img.channels();
-    // MPI_Allgather(&send_counts[id], 1, MPI_INT, send_counts, 1, MPI_INT, MPI_COMM_WORLD);
-    // update_send_index(p, send_counts , send_index);
-    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
-
     update_communication_arrays_zoom(p, id, sub_img, send_counts, send_index);
-    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
 
     // Reset the input image rows based on sum of all the sub-images' row
     MPI_Allreduce(&sub_img.rows, &img_row_num, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -404,18 +402,27 @@ void img_rotation_mpi(const int &p, const int &id, int *send_counts , int *send_
         clock_wise=true;
     }
 	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
-    update_communication_arrays (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
+    update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, clock_wise);
 	
-    //Broadcast the whole input image to each processor
-    sub_img=distribute_image_full(id, img_row_num, img_col_num, img_ch_num, img_type, img);
-   
-    //Execute the image processing function based on the assigned image
-    sub_img=img_rotation(sub_img, send_counts[id]/(img_row_num*img_ch_num), img_row_num, send_index[id]/(img_row_num*img_ch_num), clock_wise);
+    //Distribute the whole input image to the sub-images for each processor
+    sub_img=distribute_image_by_col(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts , send_index, img.data);
+    
+    // //Execute the image processing function based on the assigned image
+    sub_img=img_rotation(sub_img, sub_img.rows, sub_img.cols, clock_wise);
     
     //Initialize the image and gather all the modified sub-images to be a full modified image
     if (id==0)
     {
         img = Mat( img_col_num, img_row_num, img.type()); //Rows and cols are swapped because of the rotation
+    }
+    
+    if(clock_wise)
+    {
+        update_communication_arrays(p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
+    }
+    else
+    {
+        update_communication_arrays_opposite (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
     }
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     return;
@@ -491,14 +498,8 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     //Reset the number image row before the borders are added
     img_row_num-=(border_width*2);
     
-    // update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
-    // update_communication_arrays_border(p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, border_width);
-    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
-
     //Calculate the new communication array 
-    
     update_communication_arrays_border(p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, border_width);
-    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
     
     //Distribute the whole input image to the sub-images for each processor
 	sub_img=distribute_image(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts, send_index, img.data);
@@ -527,275 +528,3 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
 }
 
 
-// /*
-//  *   Given MPI_Datatype 't', function 'get_size' returns the
-//  *   size of a single datum of that data type.
-//  */
-
-// int get_size (MPI_Datatype t) {
-//    if (t == MPI_BYTE) return sizeof(char);
-//    if (t == MPI_DOUBLE) return sizeof(double);
-//    if (t == MPI_FLOAT) return sizeof(float);
-//    if (t == MPI_INT) return sizeof(int);
-//    printf ("Error: Unrecognized argument to 'get_size'\n");
-//    fflush (stdout);
-//    MPI_Abort (MPI_COMM_WORLD, TYPE_ERROR);
-// }
-
-// /*
-//  *   Function 'my_malloc' is called when a process wants
-//  *   to allocate some space from the heap. If the memory
-//  *   allocation fails, the process prints an error message
-//  *   and then aborts execution of the program.
-//  */
-
-// void *my_malloc (
-//    int id,     /* IN - Process rank */
-//    int bytes)  /* IN - Bytes to allocate */
-// {
-//    void *buffer;
-//    if ((buffer = malloc ((size_t) bytes)) == NULL) {
-//       printf ("Error: Malloc failed for process %d\n", id);
-//       fflush (stdout);
-//       MPI_Abort (MPI_COMM_WORLD, MALLOC_ERROR);
-//    }
-//    return buffer;
-// }
-
-// /*
-//  *   This function creates the count and displacement arrays
-//  *   needed by scatter and gather functions, when the number
-//  *   of elements send/received to/from other processes
-//  *   varies.
-//  */
-
-// void create_mixed_xfer_arrays (
-//    int id,       /* IN - Process rank */
-//    int p,        /* IN - Number of processes */
-//    int n,        /* IN - Total number of elements */
-//    int **count,  /* OUT - Array of counts */
-//    int **disp)   /* OUT - Array of displacements */
-// {
-
-//    int i;
-
-//    *count = my_malloc (id, p * sizeof(int));
-//    *disp = my_malloc (id, p * sizeof(int));
-//    (*count)[0] = BLOCK_SIZE(0,p,n);
-//    (*disp)[0] = 0;
-//    for (i = 1; i < p; i++) {
-//       (*disp)[i] = (*disp)[i-1] + (*count)[i-1];
-//       (*count)[i] = BLOCK_SIZE(i,p,n);
-//    }
-// }
-
-
-
-
-// /*
-//  *   Function 'read_col_striped_matrix' reads a matrix from a
-//  *   file.  The first two elements of the file are integers
-//  *   whose values are the dimensions of the matrix ('m' rows
-//  *   and 'n' columns).  What follows are 'm'*'n' values
-//  *   representing the matrix elements stored in row-major
-//  *   order.  This function allocates blocks of columns of the
-//  *   matrix to the MPI processes.
-//  */
-
-// void read_col_striped_matrix (
-//       char         *s,       /* IN - File name */
-//       void      ***subs,     /* OUT - 2-D array */
-//       void       **storage,  /* OUT - Array elements */
-//       MPI_Datatype dtype,    /* IN - Element type */
-//       int         *m,        /* OUT - Rows */
-//       int         *n,        /* OUT - Cols */
-//       MPI_Comm     comm)     /* IN - Communicator */
-// {
-//    void      *buffer;        /* File buffer */
-//    int        datum_size;    /* Size of matrix element */
-//    int        i, j;
-//    int        id;            /* Process rank */
-//    FILE      *infileptr;     /* Input file ptr */
-//    int        local_cols;    /* Cols on this process */
-//    void     **lptr;          /* Pointer into 'subs' */
-//    void      *rptr;          /* Pointer into 'storage' */
-//    int        p;             /* Number of processes */
-//    int       *send_count;    /* Each proc's count */
-//    int       *send_disp;     /* Each proc's displacement */
-
-//    MPI_Comm_size (comm, &p);
-//    MPI_Comm_rank (comm, &id);
-//    datum_size = get_size (dtype);
-
-//    /* Process p-1 opens file, gets number of rows and
-//       cols, and broadcasts this info to other procs. */
-
-//    if (id == (p-1)) {
-//       infileptr = fopen (s, "r");
-//       if (infileptr == NULL) *m = 0;
-//       else {
-//          fread (m, sizeof(int), 1, infileptr);
-//          fread (n, sizeof(int), 1, infileptr);
-//       }
-//    }
-//    MPI_Bcast (m, 1, MPI_INT, p-1, comm);
-
-//    if (!(*m)) MPI_Abort (comm, OPEN_FILE_ERROR);
-
-//    MPI_Bcast (n, 1, MPI_INT, p-1, comm);
-
-//    local_cols = BLOCK_SIZE(id,p,*n); // sub-n cols for each procs
-
-//    /* Dynamically allocate two-dimensional matrix 'subs' */
-
-//    *storage = my_malloc (id, *m * local_cols * datum_size); //Allocate sub-n * row-m * dataSize to sub array
-//    *subs = (void **) my_malloc (id, *m * PTR_SIZE);  //Allocate row-m array
-//    lptr = (void *) *subs;
-//    rptr = (void *) *storage;
-   
-//    // Create a empty contiguous 2D array (subs) in m*sub-n
-//    for (i = 0; i < *m; i++) {
-//       *(lptr++) = (void *) rptr;
-//       rptr += local_cols * datum_size;
-//    }
-
-//    /* Process p-1 reads in the matrix one row at a time and
-//       distributes each row among the MPI processes. */
-
-//    if (id == (p-1))
-//       buffer = my_malloc (id, *n * datum_size);
-//    create_mixed_xfer_arrays (id,p,*n,&send_count,&send_disp);
-//    for (i = 0; i < *m; i++) {
-//       if (id == (p-1))
-//          fread (buffer, datum_size, *n, infileptr);
-//       MPI_Scatterv (buffer, send_count, send_disp, dtype,
-//          (*storage)+i*local_cols*datum_size, local_cols,
-//          dtype, p-1, comm);
-//    }
-// //    MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-//    free (send_count);
-//    free (send_disp);
-//    if (id == (p-1)) free (buffer);
-// }
-
-
-
-void update_communication_arrays_by_col(const int &p, const int &img_row_num, const int &img_col_num, const int &img_ch_num, int *send_counts , int *send_index, const bool clock_wise)
-{
-    
-    int sub_col_num;
-    // int elements_num=img_row_num*img_ch_num; //Represent the total elements of a col
-    
-    // printf("img_row_num=%d, img_col_num=%d, img_ch_num=%d\n",img_row_num, img_col_num, img_ch_num);
-
-    // for(int i = 0; i < p; i++) {
-    //     sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
-    //     send_counts[i] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
-    //     send_index[i] = (((i*img_col_num)/p))*img_ch_num;
-    //     // printf("send_counts[%d]=%d , send_index[%d]=%d \n", i, send_counts[i], i, send_index[i] );
-    // }
-
-    int r;
-    int index_offset;
-    if(clock_wise) 
-	{
-        r=-1;
-        index_offset=0;
-	}
-	else
-	{ 
-        r=1;
-        index_offset=p-1;
-	}
-
-    for(int i = 0; i < p; i++) {
-        sub_col_num=((((i+1)*img_col_num)/p)-((i*img_col_num)/p));
-        send_counts[r*(index_offset-i)] = sub_col_num*img_ch_num; //The number of elements is sub-image's cols * image's channels
-        send_index[r*(index_offset-i)] = (((i*img_col_num)/p))*img_ch_num;
-        // printf("send_counts[%d]=%d , send_index[%d]=%d \n", i, send_counts[i], i, send_index[i] );
-    }
-    
-}
-
-
-Mat distribute_image_by_col(const int &id, const int &img_row_num, const int &img_col_num, const int &img_ch_num, const int &img_type, const int *send_counts , const int *send_index, const uchar *img_data)
-{   
-    int recv_counts=send_counts[id]; //Store the size of the sub-image's data
-    int elements_num=img_col_num*img_ch_num; //Represent the total elements of a row
-    int sub_img_col=send_counts[id]/img_ch_num; //Store the size of the sub-image's col
-    Mat sub_img(img_row_num, sub_img_col, img_type); //Construct the sub-image with (image's rows, assigned sub-image's col number, 3 channels)
-    
-    // //Assign the sublist from process 0 to each process
-    // MPI_Scatterv(img_data, send_counts, send_index, MPI_UNSIGNED_CHAR, sub_img.data, recv_counts, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-
-    for (int i = 0; i < img_row_num; i++) {
-    //   if (id == (p-1))
-    //      fread (buffer, datum_size, *n, infileptr);
-      MPI_Scatterv (img_data+i*elements_num, send_counts, send_index, MPI_UNSIGNED_CHAR,
-         sub_img.data+i*recv_counts, recv_counts,
-         MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-   }
-    return sub_img;
-}
-
-void img_rotation_mpi_V2(const int &p, const int &id, int *send_counts , int *send_index, Mat &img)
-{
-    if(id==0)
-    {
-        printf("img_rotation\n");
-    }
-
-    int img_row_num; //Store the number of the input image's row
-    int img_col_num; //Store the number of the input image's col
-    int img_ch_num; //Store the number of the input image's channel
-    int img_type; //Store the input image's type
-    bool clock_wise=false;
-    int dir_selection; //Store the select direction 
-    int clockwise=1; //Represent the selection of clockwise to be 1
-    int counter_clockwise=2; //Represent the selection of counter clockwise to be 2
-	Mat sub_img; //Store the distributed sub-image
-
-    if(id==0)
-    {
-        cout<<"Please select direction: 1. clockwise 2. counter-clockwise"<<endl;
-    }
-    dir_selection=get_valid_input<int>(id,clockwise,counter_clockwise);
-    if(dir_selection==clockwise)
-    {
-        clock_wise=true;
-    }
-	update_image_properties(id, img, img_row_num, img_col_num, img_ch_num, img_type);
-    update_communication_arrays_by_col (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index, clock_wise);
-    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
-
-	
-    //Broadcast the whole input image to each processor
-    sub_img=distribute_image_by_col(id, img_row_num, img_col_num, img_ch_num, img_type, send_counts , send_index, img.data);
-    // cout<<sub_img.size()<<" "<<sub_img.type()<<" "<<" id= "<<id<<" "<<img.size()<<endl;
-    // imshow("image", sub_img);
-    // waitKey(0);
-    // destroyAllWindows();
-    
-
-
-
-    // //Execute the image processing function based on the assigned image
-    // sub_img=img_rotation(sub_img, send_counts[id]/(img_row_num*img_ch_num), img_row_num, send_index[id]/(img_row_num*img_ch_num), clock_wise);
-    sub_img=img_rotation_v2(sub_img, sub_img.rows, sub_img.cols, 0, clock_wise);
-
-    cout<<sub_img.size()<<" "<<sub_img.type()<<" "<<" id= "<<id<<" "<<img.size()<<endl;
-    imshow("image", sub_img);
-    waitKey(0);
-    destroyAllWindows();
-    
-    //Initialize the image and gather all the modified sub-images to be a full modified image
-    if (id==0)
-    {
-        img = Mat( img_col_num, img_row_num, img.type()); //Rows and cols are swapped because of the rotation
-    }
-    
-    update_communication_arrays (p, img_col_num, img_row_num, img_ch_num, send_counts , send_index);
-    print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
-    MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
-    return;
-}
