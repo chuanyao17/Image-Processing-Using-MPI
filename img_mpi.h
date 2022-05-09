@@ -1,5 +1,5 @@
-#ifndef __MATRIX_PARA_H__
-#define __MATRIX_PARA_H__
+#ifndef __IMG_MPI_H__
+#define __IMG_MPI_H__
 #include <iostream>
 #include "opencv2/opencv.hpp"
 #include "mpi.h"
