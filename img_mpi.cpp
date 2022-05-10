@@ -104,20 +104,12 @@ void update_communication_arrays_border(const int &p, const int &img_row_num, co
     {
         sub_row_num=((((i+1)*img_row_num)/p)-((i*img_row_num)/p));
         send_counts[i] = sub_row_num*elements_num; //The number of elements is sub-rows * image's cols * image's channels
-        
         //Add the additional border elements to all the processors which contain non-zero assigned sub-rows
         if(sub_row_num!=0)
         {
             send_counts[i]+=(elements_num*border*2);
         }
         send_index[i] = (((i*img_row_num)/p))*elements_num;
-        
-        //Move index to the previous(upper) row based on the border width except the first processor which contain non-zero assigned sub-rows
-        if(send_index[i]!=0)
-        {
-            send_index[i]-=(elements_num*border);
-            
-        }
     }
 }   
 
@@ -202,6 +194,12 @@ void print_send_buffers(const int &id, const int &p, int *send_counts , int *sen
         for(int i=0;i<p;i++)
         {
             cout<<send_index[i]<<" ";
+        }
+        cout<<endl;
+        cout<<"send_rows= ";
+        for(int i=0;i<p;i++)
+        {
+            cout<<send_counts[i]/(img_col_num*img_ch_num)<<" ";
         }
         cout<<endl;
     }
@@ -577,6 +575,7 @@ void img_blurring_mpi(const int &p, const int &id, int *send_counts , int *send_
     }
     //Reset the communication arrays for gathering all the modified sub-images
     update_communication_arrays (p, img_row_num, img_col_num, img_ch_num, send_counts , send_index);
+    // print_send_buffers(id, p, send_counts , send_index, img_col_num, img_ch_num);
     MPI_Gatherv(sub_img.data, send_counts[id], MPI_UNSIGNED_CHAR, img.data, send_counts, send_index, MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     
     //If the gaussiain blur is selected, delete the allocated memory 
