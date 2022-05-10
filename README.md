@@ -25,7 +25,7 @@ The basic command line to run the MPI program is as following
 
 This is an example to run the program with 2 processors(tasks)
 ```
-~$ mpirun -np 2 main women.jpg
+~$ mpirun -np 2 main women.png
 ```
 
 The program has the following *optional* command line arguments:
