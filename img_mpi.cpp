@@ -1,3 +1,15 @@
+/*******************************************************************************
+  Title          : img_mpi.cpp
+  Author         : Chuanyao Lin,
+  Created on     : May 10, 2022
+  Description    : Implements functions to perform parallel image processing for MPI programs
+  Purpose        :
+  Build with     : cmake , please check README
+  License        : Copyright 2022 Chuanyao Lin
+
+      This code constains all the fuctions including the usage of MPI and OpenCV.
+*******************************************************************************/
+
 #include <iostream>
 #include <cstdio>
 #include <algorithm> 

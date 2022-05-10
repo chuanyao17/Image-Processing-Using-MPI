@@ -1,3 +1,15 @@
+/*******************************************************************************
+  Title          : img_processing.cpp
+  Author         : Chuanyao Lin,
+  Created on     : May 10, 2022
+  Description    : Implements functions to perform sequential various image processing
+  Purpose        :
+  Build with     : cmake , please check README
+  License        : Copyright 2022 Chuanyao Lin
+
+      This code constains all the fuctions including the usage of OpenCV.
+*******************************************************************************/
+
 #include <iostream>
 #include <cstdio>
 #include "mpi.h"

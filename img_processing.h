@@ -1,3 +1,15 @@
+/*******************************************************************************
+  Title          : img_processing.h
+  Author         : Chuanyao Lin,
+  Created on     : May 10, 2022
+  Description    : Implements functions to perform sequential various image processing
+  Purpose        :
+  Build with     : cmake , please check README
+  License        : Copyright 2022 Chuanyao Lin
+
+      This code constains all the fuctions including the usage of OpenCV.
+*******************************************************************************/
+
 #ifndef __IMG_PROCESSING_H__
 #define __IMG_PROCESSING_H__
 #include "opencv2/opencv.hpp"
