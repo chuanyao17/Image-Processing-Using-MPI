@@ -1,4 +1,4 @@
-# Image-Processing-Using-MPI - final project in 2022 Spring at Hunter College
+# Image Processing Using MPI - the final project in 2022 Spring at Hunter College
 This repository contains the various parallelizable image processing functions.  
 ***Authors: Chuanyao Lin***
 ### Installation
@@ -9,7 +9,7 @@ The repository has the following requirements:
  - `CMake`
  - `OpenCV`
  
- Typed the following command line to build the program
+Type the following command line to build the program
 
 ```
 ~$ sh install.sh
