@@ -8,6 +8,7 @@ The repository has the following requirements:
  - `MPI`
  - `CMake`
  - `OpenCV`
+ - `X server`
  
 Type the following command line to build the program
 
