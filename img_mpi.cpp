@@ -22,7 +22,7 @@
 #define alpha_min_value 0.1 //Represent the minimum alpha value for the image contrast ratio
 #define alpha_max_value 3   //Represent the maximum alpha value for the image contrast ratio
 
-#define beta_min_value 0    //Represent the minimum beta value for increasing the brightness
+#define beta_min_value -50    //Represent the minimum beta value for increasing the brightness
 #define beta_max_value 100  //Represent the maximum beta value for increasing the brightness
 
 using namespace cv;
