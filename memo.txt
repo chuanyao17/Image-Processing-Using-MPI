@@ -1,0 +1,6 @@
+1. Redesign the image show like scroll bar to make sure the showed image is controllable.
+2. Flush the ios stream after closing the image, so that the program won't act in odd way.
+(if the screen is not focusing on the opened image, the type character might not able to close the image, or it will remain as another input in the next step of the program.)
+3. If the image needs to be blurred more, the size of the filter(kernel matrix) could be larger.
+4. Header file should be more clear, like adding more explanation and the definition of the arguments.
+5. The usage of <> and "" while including file should be understandable like #include "opencv2/opencv.hpp".
